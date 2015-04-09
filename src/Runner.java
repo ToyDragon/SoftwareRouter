@@ -4,6 +4,9 @@ import java.util.Scanner;
 
 public class Runner {
 	
+	boolean isRunning;
+	boolean isPaused;
+	
 	Scanner uiScanner;
 	Simulation simulation;
 	int amtRouters;
@@ -12,19 +15,38 @@ public class Runner {
 	double failRate;
 	ArrayList<NetworkDevice> hostList;
 	ArrayList<NetworkDevice> routerList;
+	ArrayList<Link> linkList;
 	
 	public static void main(String[] args){
 		new Runner();
 	}
 	
 	public Runner(){
+		isRunning = true;
+		isPaused = false;
+		
 		uiScanner = new Scanner(System.in);
-		simulation = new Simulation();
+		simulation = new Simulation(this);
 		getUserConfig();
 		initializeNetwork();
+		
+		simulation.startSimulation();
+		System.out.println("Simulation started");
+	}
+	
+	public boolean isRunning(){
+		return isRunning;
+	}
+	
+	public boolean isPaused(){
+		return isPaused;
 	}
 	
 	public void initializeNetwork(){
+		
+		simulation.setNetworkDevices(routerList);
+		simulation.setHostDevices(hostList);
+		simulation.setLinkList(linkList);
 	}
 	
 	public void getUserConfig(){
@@ -33,12 +55,6 @@ public class Runner {
 		readRouterConfiguration();
 		readLinkConfiguration();
 		readHostConfiguration();
-		
-		simulation.setNetworkDevices(routerList);
-		simulation.setHostDevices(hostList);
-		
-		System.out.println("Simulation ready to run!");
-		
 	}
 	
 	private void printBanner(){
@@ -111,7 +127,6 @@ public class Runner {
 		for(int i = 0; i < amtRouters; i++){
 			routerList.add(new Router());
 		}
-		System.out.println(amtRouters + " routers have been created!");
 	}
 	
 	private void readLinkConfiguration(){
@@ -141,7 +156,7 @@ public class Runner {
 		/////////////////////////////////////////////////////////////////////////////////////////////////
 		//Link connection information
 		System.out.println("Enter " + amtLinks + " lines of link information, in the format \"X Y C\" where X and Y are router indexes and C is an integer cost.");
-		ArrayList<Link> linkList = new ArrayList<Link>(amtLinks * 2);
+		linkList = new ArrayList<Link>(amtLinks * 2);
 		for(int i = 0; i < amtLinks; i++){
 			Link leftLink = null;
 			Link rightLink = null;

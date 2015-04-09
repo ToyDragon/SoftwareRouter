@@ -18,6 +18,14 @@ public class Link {
 		target = t;		
 	}
 	
+	public NetworkDevice getDevice(){
+		return target;
+	}
+	
+	public void tick(){	
+		//TODO
+	}
+	
 	public void setCost(int k) throws IllegalArgumentException
 	{
 		if(k <= 0)

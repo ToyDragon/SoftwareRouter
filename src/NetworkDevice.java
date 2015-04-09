@@ -18,4 +18,10 @@ public abstract class NetworkDevice {
 	public void addLink(Link link){
 		outLinks.add(link);
 	}
+	
+	public boolean removeLink(Link link){
+		return outLinks.remove(link);
+	}
+	
+	abstract void tick();
 }
