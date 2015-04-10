@@ -97,11 +97,13 @@ public class Runner {
 					
 					newHost = new Host();
 
-					Link inLink = new Link(newHost, failRate);
-					Link outLink = new Link(connectedRouter, failRate);
+					Link rightLink = new Link(connectedRouter, newHost, failRate);
+					Link leftLink = new Link(newHost, connectedRouter, failRate);
 					
-					newHost.addLink(outLink);
-					connectedRouter.addLink(inLink);
+					connectedRouter.addOutLink(rightLink);
+					newHost.addInLink(rightLink);
+					connectedRouter.addInLink(leftLink);
+					newHost.addOutLink(leftLink);
 					
 				}catch(IllegalArgumentException e){
 					System.out.println(e.getMessage());
@@ -184,8 +186,8 @@ public class Runner {
 					leftRouter = (Router)routerList.get(leftID);
 					rightRouter = (Router)routerList.get(rightID);
 
-					leftLink = new Link(leftRouter, failRate);
-					rightLink = new Link(rightRouter, failRate);
+					leftLink = new Link(rightRouter, leftRouter, failRate);
+					rightLink = new Link(leftRouter, rightRouter, failRate);
 					
 				}catch(IllegalArgumentException e){
 					System.out.println(e.getMessage());
@@ -196,8 +198,10 @@ public class Runner {
 			linkList.add(leftLink);
 			linkList.add(rightLink);
 
-			leftRouter.addLink(rightLink);
-			rightRouter.addLink(leftLink);
+			leftRouter.addInLink(leftLink);
+			rightRouter.addOutLink(leftLink);
+			leftRouter.addOutLink(rightLink);
+			rightRouter.addInLink(rightLink);
 		}
 	}
 }
