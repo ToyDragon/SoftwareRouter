@@ -6,25 +6,33 @@ import java.util.Queue;
 
 public class Link {
 
+	private final NetworkDevice source;
 	private final NetworkDevice target;
 	private int linkCost;
 	private final double failRate;
+	private boolean isBusy;
 	private List<Packet> transitPackets;
 	private Queue<Packet> arrivedPackets;
-	
-	public Link(NetworkDevice t, double f) throws IllegalArgumentException
+		
+	public Link(NetworkDevice source,NetworkDevice target, double f) throws IllegalArgumentException
 	{
 		if(f < 0.0 || f > 1.0)
 			throw new IllegalArgumentException();
 		transitPackets = new ArrayList<Packet>();
 		arrivedPackets = new LinkedList<Packet>();
+		isBusy = false;
 		failRate = f;
-		target = t;		
+		this.target = target;		
+		this.source = source;
 	}
 	
 	public void addPacket(Packet packet){
-		packet.timeInQueue = 0;
-		transitPackets.add(packet);
+		if(!isBusy){
+			isBusy = true;
+			
+			packet.timeInQueue = 0;
+			transitPackets.add(packet);
+		}
 	}
 	
 	public void tick(){	
@@ -37,6 +45,19 @@ public class Link {
 				arrivedPackets.offer(packet);
 			}
 		}
+		isBusy = false;
+	}
+	
+	public Packet peekHead(){
+		return arrivedPackets.peek();
+	}
+	
+	public Packet popHead(){
+		return arrivedPackets.poll();
+	}
+	
+	public boolean isBusy(){
+		return isBusy;
 	}
 	
 	public NetworkDevice getDevice(){
