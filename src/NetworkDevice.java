@@ -6,8 +6,9 @@ public abstract class NetworkDevice {
 	
 	private static int tally = 0;
 	
-	private final int ID;
-	private List<Link> outLinks;
+	final int ID;
+	List<Link> outLinks;
+	List<Link> inLinks;
 	
 	public NetworkDevice()
 	{
@@ -15,12 +16,16 @@ public abstract class NetworkDevice {
 		outLinks = new ArrayList<Link>();
 	}
 	
-	public void addLink(Link link){
+	public void addOutLink(Link link){
 		outLinks.add(link);
 	}
 	
+	public void addInLink(Link link){
+		inLinks.add(link);
+	}
+	
 	public boolean removeLink(Link link){
-		return outLinks.remove(link);
+		return outLinks.remove(link) || inLinks.remove(link);
 	}
 	
 	abstract void tick();
