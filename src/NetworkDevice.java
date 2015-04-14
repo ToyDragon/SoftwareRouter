@@ -14,6 +14,7 @@ public abstract class NetworkDevice {
 	{
 		ID = tally++;
 		outLinks = new ArrayList<Link>();
+		inLinks = new ArrayList<Link>();
 	}
 	
 	public void addOutLink(Link link){

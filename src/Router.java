@@ -7,12 +7,13 @@ public class Router extends NetworkDevice{
 		if(hasTableChanged){
 			RoutingPacket routingPacket = getRoutingPacket();
 			
-			for(Link outLink : outLinks){
-				if(!outLink.isBusy()){
-					outLink.addPacket(routingPacket);
+			if(routingPacket != null){
+				for(Link outLink : outLinks){
+					if(!outLink.isBusy()){
+						outLink.addPacket(routingPacket);
+					}
 				}
 			}
-		
 		}
 		
 		for(Link sourceLink : inLinks){

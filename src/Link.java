@@ -11,10 +11,11 @@ public class Link {
 	private int linkCost;
 	private final double failRate;
 	private boolean isBusy;
+	private Link partnerLink;
 	private List<Packet> transitPackets;
 	private Queue<Packet> arrivedPackets;
 		
-	public Link(NetworkDevice source,NetworkDevice target, double f) throws IllegalArgumentException
+	public Link(NetworkDevice source, NetworkDevice target, double f) throws IllegalArgumentException
 	{
 		if(f < 0.0 || f > 1.0)
 			throw new IllegalArgumentException();
@@ -24,6 +25,10 @@ public class Link {
 		failRate = f;
 		this.target = target;		
 		this.source = source;
+	}
+	
+	public void setPartnerLink(Link partnerLink){
+		this.partnerLink = partnerLink;
 	}
 	
 	public void addPacket(Packet packet){
