@@ -32,6 +32,22 @@ public class Runner {
 		
 		simulation.startSimulation();
 		System.out.println("Simulation started");
+		
+		userInputLoop();
+	}
+	
+	private void userInputLoop(){
+		while(true){
+			String rawInput = uiScanner.nextLine();
+			String[] inputTokens = rawInput.split(" ");
+			if(inputTokens[0].equalsIgnoreCase("pause")){
+				isPaused = true;
+			}
+			if(inputTokens[0].equalsIgnoreCase("unpause")){
+				isPaused = false;
+			}
+			
+		}
 	}
 	
 	public boolean isRunning(){
@@ -99,6 +115,9 @@ public class Runner {
 
 					Link rightLink = new Link(connectedRouter, newHost, failRate);
 					Link leftLink = new Link(newHost, connectedRouter, failRate);
+
+					rightLink.setPartnerLink(leftLink);
+					leftLink.setPartnerLink(rightLink);
 					
 					connectedRouter.addOutLink(rightLink);
 					newHost.addInLink(rightLink);
@@ -188,6 +207,9 @@ public class Runner {
 
 					leftLink = new Link(rightRouter, leftRouter, failRate);
 					rightLink = new Link(leftRouter, rightRouter, failRate);
+					
+					leftLink.setPartnerLink(rightLink);
+					rightLink.setPartnerLink(leftLink);
 					
 				}catch(IllegalArgumentException e){
 					System.out.println(e.getMessage());
