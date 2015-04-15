@@ -9,26 +9,36 @@ public class Link {
 	private final NetworkDevice source;
 	private final NetworkDevice target;
 	private int linkCost;
-	private final double failRate;
+	public static double failRate;
 	private boolean isBusy;
 	private Link partnerLink;
 	private List<Packet> transitPackets;
 	private Queue<Packet> arrivedPackets;
 		
-	public Link(NetworkDevice source, NetworkDevice target, double f) throws IllegalArgumentException
+	public Link(NetworkDevice source, NetworkDevice target, int cost)
 	{
-		if(f < 0.0 || f > 1.0)
-			throw new IllegalArgumentException();
 		transitPackets = new ArrayList<Packet>();
 		arrivedPackets = new LinkedList<Packet>();
 		isBusy = false;
-		failRate = f;
+		this.linkCost = cost;
 		this.target = target;		
 		this.source = source;
 	}
 	
+	public NetworkDevice getSource(){
+		return source;
+	}
+	
+	public NetworkDevice getTarget(){
+		return target;
+	}
+	
 	public void setPartnerLink(Link partnerLink){
 		this.partnerLink = partnerLink;
+	}
+	
+	public Link getPartnerLink(){
+		return partnerLink;
 	}
 	
 	public void addPacket(Packet packet){

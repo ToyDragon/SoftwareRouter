@@ -1,8 +1,14 @@
 
 public class Router extends NetworkDevice{
 
+	private static int tally = 0;
 	boolean hasTableChanged;
-
+	
+	public Router(){
+		super();
+		ID = tally++;
+	}
+	
 	public void tick() {
 		if(hasTableChanged){
 			RoutingPacket routingPacket = getRoutingPacket();

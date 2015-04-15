@@ -4,15 +4,12 @@ import java.util.List;
 
 public abstract class NetworkDevice {
 	
-	private static int tally = 0;
-	
-	final int ID;
+	protected int ID;
 	List<Link> outLinks;
 	List<Link> inLinks;
 	
 	public NetworkDevice()
 	{
-		ID = tally++;
 		outLinks = new ArrayList<Link>();
 		inLinks = new ArrayList<Link>();
 	}

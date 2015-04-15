@@ -1,8 +1,11 @@
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class Simulation {
+	private static Simulation instance;
+	
 	Runner runner;
 	
 	List<NetworkDevice> networkDevices;
@@ -17,7 +20,11 @@ public class Simulation {
 	TickThread tickThread;
 	
 	public Simulation(Runner runner){
+		instance = this;
 		this.runner = runner;
+		hostDevices = new CopyOnWriteArrayList<NetworkDevice>();
+		networkDevices = new CopyOnWriteArrayList<NetworkDevice>();
+		linkList = new CopyOnWriteArrayList<Link>();
 		
 		devicesToRemove = new CopyOnWriteArrayList<NetworkDevice>();
 		devicesToAdd = new CopyOnWriteArrayList<NetworkDevice>();
@@ -27,6 +34,10 @@ public class Simulation {
 		tickThread = new TickThread(runner, this);
 	}
 	
+	public static void log(String msg){
+		System.out.println(msg);
+	}
+	
 	public void startSimulation(){
 		if(!tickThread.isAlive()){
 			tickThread.start();
@@ -34,9 +45,8 @@ public class Simulation {
 	}
 	
 	public void tick(){
+		runner.graphicsPanel.repaint();
 		if(runner.isPaused())return;
-		
-		System.out.println("Simulation ticked");
 		
 		//tick all devices and links
 		for(NetworkDevice device : hostDevices){
@@ -55,7 +65,6 @@ public class Simulation {
 			hostDevices.remove(device);
 			networkDevices.remove(device);
 		}
-		
 		for(int i = devicesToAdd.size()-1; i >= 0; i--){
 			NetworkDevice device = devicesToAdd.remove(i);
 			if(device instanceof Host){
@@ -111,7 +120,7 @@ public class Simulation {
 	}
 	
 	public static class TickThread extends Thread{
-		int tickTime = 1000;
+		int tickTime = 250;
 		Runner runner;
 		Simulation simulation;
 		
