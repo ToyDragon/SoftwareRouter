@@ -14,6 +14,11 @@ public abstract class NetworkDevice {
 		inLinks = new ArrayList<Link>();
 	}
 	
+	public int getID()
+	{
+		return ID;		
+	}
+	
 	public void addOutLink(Link link){
 		outLinks.add(link);
 	}

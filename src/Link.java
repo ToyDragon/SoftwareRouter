@@ -9,17 +9,19 @@ public class Link {
 	private final NetworkDevice source;
 	private final NetworkDevice target;
 	private int linkCost;
+	private int clock;
 	public static double failRate;
 	private boolean isBusy;
 	private Link partnerLink;
-	private List<Packet> transitPackets;
+	private MinHeap<Packet> transitPackets;
 	private Queue<Packet> arrivedPackets;
 		
 	public Link(NetworkDevice source, NetworkDevice target, int cost)
 	{
-		transitPackets = new ArrayList<Packet>();
+		transitPackets = new MinHeap<Packet>();
 		arrivedPackets = new LinkedList<Packet>();
 		isBusy = false;
+		clock = 0;
 		this.linkCost = cost;
 		this.target = target;		
 		this.source = source;
@@ -45,19 +47,37 @@ public class Link {
 		if(!isBusy){
 			isBusy = true;
 			
-			packet.timeInQueue = 0;
-			transitPackets.add(packet);
+			//packet.timeInQueue = 0;
+			transitPackets.add(clock + linkCost, packet);
 		}
 	}
 	
 	public void tick(){	
-		for(int i = transitPackets.size()-1; i >= 0; i--){
+		/*for(int i = transitPackets.size()-1; i >= 0; i--){
 			Packet packet = transitPackets.get(i);
 			packet.timeInQueue++;
 			
 			if(packet.timeInQueue >= linkCost){
 				transitPackets.remove(i);
 				arrivedPackets.offer(packet);
+			}
+		}*/
+		clock++;
+		boolean b = true;
+		while(b)
+		{
+			b = false;
+			try
+			{
+				if(!(transitPackets.isEmpty()) && transitPackets.peek() <= clock)
+				{
+					arrivedPackets.offer(transitPackets.extract());
+					b = true;
+				}
+			}
+			catch(Exception e)
+			{
+				System.out.println(e.getMessage());
 			}
 		}
 		isBusy = false;

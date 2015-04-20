@@ -118,6 +118,13 @@ public class MinHeap<T>
 		return heap[size].thing;
 	}
 	
+	public int peek() throws Exception
+	{
+		if(size == 0)
+			throw new Exception("Heap underflow exception");
+		return heap[0].key;
+	}
+	
 	public boolean isEmpty()
 	{
 		return size == 0;
