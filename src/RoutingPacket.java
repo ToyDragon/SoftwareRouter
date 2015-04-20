@@ -1,21 +1,16 @@
 
-public class RoutingPacket extends Packet{
+public class RoutingPacket extends Packet
+{	
+	private final RoutingRow payload;
 	
-	private final Pair[] payload;
-	
-	public RoutingPacket(int k, Pair[] o)
+	public RoutingPacket(int k, RoutingRow o)
 	{
 		super(k);
 		payload = o;
 	}
 	
-	public Pair getPair(int i)
-	{
-		Pair temp = new Pair();
-		temp.weight = payload[i].weight;
-		temp.dest = payload[i].dest;
-		
-		return temp;
+	public RoutingRow getPayload()
+	{		
+		return payload;
 	}
-
 }

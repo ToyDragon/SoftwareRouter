@@ -19,6 +19,14 @@ public abstract class NetworkDevice {
 		return ID;		
 	}
 	
+	public void process(Packet p)
+	{
+		if(p.getDest() == ID)
+			System.out.println("Packet Received.");
+		else
+			System.out.println("Something went wrong.");
+	}
+	
 	public void addOutLink(Link link){
 		outLinks.add(link);
 	}
@@ -31,5 +39,6 @@ public abstract class NetworkDevice {
 		return outLinks.remove(link) || inLinks.remove(link);
 	}
 	
-	abstract void tick();
+	private void updateTable()
+	{}
 }

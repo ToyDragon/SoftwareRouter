@@ -21,14 +21,74 @@ public class Router extends NetworkDevice{
 	
 	public void sendDV()
 	{
-		//for each link
+		for(Link l : outLinks)
 		{
-			Link l = new Link(this,this,1);
-			RoutingPacket temp = new RoutingPacket(l.getTarget().getID(),table);
+			l.addPacket(new RoutingPacket(l.getTarget().getID(), new RoutingRow(getID(), table)));
 		}
 	}
 	
-	public void tick() {
+	private void updateTable()
+	{
+		boolean updated = false;
+		Pair[] temp = new Pair[table.length];
+		
+		for(int i = 0; i < temp.length; i++)
+			temp[i] = new Pair();
+		for(RoutingRow r : neighborVectors)
+		{
+			for(Link l : outLinks)
+			{
+				if(l.getTarget().getID() == r.source)
+				{
+					for(int i = 0; i < temp.length; i++)
+					{
+						if(r.vector[i].weight + l.getCost() < temp[i].weight)
+						{
+							temp[i].weight = r.vector[i].weight + l.getCost();
+							temp[i].dest = l; 
+						}
+					}
+					break;
+				}
+			}
+		}
+		
+		for(int i = 0; i < temp.length; i++)
+		{
+			if(table[i].weight > temp[i].weight)
+			{
+				table[i] =temp[i];
+				updated = true;
+			}
+		}
+		
+		if(updated)
+			sendDV();			
+	}
+	
+	public void process(Packet p)
+	{
+		if(this.getID() == p.getDest())
+		{
+			boolean found = false;
+			for(RoutingRow r : neighborVectors)
+			{
+				if(r.source == ((RoutingPacket)p).getPayload().source)
+				{
+					r = ((RoutingPacket)p).getPayload();
+					found = true;
+				}				
+			}
+			if(!found)
+				neighborVectors.add(((RoutingPacket)p).getPayload());
+			updateTable();
+		}
+		else
+			table[p.getDest()].dest.addPacket(p);
+		
+	}
+	
+	/*public void tick() {
 		if(hasTableChanged){
 			RoutingPacket routingPacket = getRoutingPacket();
 			
@@ -65,7 +125,7 @@ public class Router extends NetworkDevice{
 				}
 			}
 		}
-	}
+	}*/
 	
 	public RoutingPacket getRoutingPacket(){
 		//TODO

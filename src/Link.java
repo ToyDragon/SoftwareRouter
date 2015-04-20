@@ -1,6 +1,5 @@
-import java.util.ArrayList;
+
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 
@@ -11,16 +10,12 @@ public class Link {
 	private int linkCost;
 	private int clock;
 	public static double failRate;
-	private boolean isBusy;
 	private Link partnerLink;
 	private MinHeap<Packet> transitPackets;
-	private Queue<Packet> arrivedPackets;
 		
 	public Link(NetworkDevice source, NetworkDevice target, int cost)
 	{
 		transitPackets = new MinHeap<Packet>();
-		arrivedPackets = new LinkedList<Packet>();
-		isBusy = false;
 		clock = 0;
 		this.linkCost = cost;
 		this.target = target;		
@@ -43,25 +38,14 @@ public class Link {
 		return partnerLink;
 	}
 	
-	public void addPacket(Packet packet){
-		if(!isBusy){
-			isBusy = true;
-			
+	public void addPacket(Packet packet)
+	{
 			//packet.timeInQueue = 0;
 			transitPackets.add(clock + linkCost, packet);
-		}
 	}
 	
-	public void tick(){	
-		/*for(int i = transitPackets.size()-1; i >= 0; i--){
-			Packet packet = transitPackets.get(i);
-			packet.timeInQueue++;
-			
-			if(packet.timeInQueue >= linkCost){
-				transitPackets.remove(i);
-				arrivedPackets.offer(packet);
-			}
-		}*/
+	public void tick()
+	{	
 		clock++;
 		boolean b = true;
 		while(b)
@@ -71,7 +55,7 @@ public class Link {
 			{
 				if(!(transitPackets.isEmpty()) && transitPackets.peek() <= clock)
 				{
-					arrivedPackets.offer(transitPackets.extract());
+					target.process(transitPackets.extract());
 					b = true;
 				}
 			}
@@ -80,19 +64,6 @@ public class Link {
 				System.out.println(e.getMessage());
 			}
 		}
-		isBusy = false;
-	}
-	
-	public Packet peekHead(){
-		return arrivedPackets.peek();
-	}
-	
-	public Packet popHead(){
-		return arrivedPackets.poll();
-	}
-	
-	public boolean isBusy(){
-		return isBusy;
 	}
 	
 	public NetworkDevice getDevice(){
@@ -104,6 +75,8 @@ public class Link {
 		if(k <= 0)
 			throw new IllegalArgumentException();
 		linkCost = k;
+		source.updateTable();
+		target.updateTable();
 	}
 	
 	public int getCost()
