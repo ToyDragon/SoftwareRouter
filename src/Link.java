@@ -12,6 +12,7 @@ public class Link {
 	private int clock;
 	public static double failRate;
 	private boolean isBusy;
+	private boolean isDisabled;
 	private Link partnerLink;
 	private MinHeap<Packet> transitPackets;
 	private Queue<Packet> arrivedPackets;
@@ -35,6 +36,14 @@ public class Link {
 		return target;
 	}
 	
+	public boolean getDisabled(){
+		return isDisabled;
+	}
+	
+	public void setDisabled(boolean disabled){
+		isDisabled = disabled;
+	}
+	
 	public void setPartnerLink(Link partnerLink){
 		this.partnerLink = partnerLink;
 	}
@@ -44,7 +53,7 @@ public class Link {
 	}
 	
 	public void addPacket(Packet packet){
-		if(!isBusy){
+		if(!isBusy && !isDisabled){
 			isBusy = true;
 			
 			//packet.timeInQueue = 0;
@@ -53,6 +62,7 @@ public class Link {
 	}
 	
 	public void tick(){	
+		if(isDisabled)return;
 		/*for(int i = transitPackets.size()-1; i >= 0; i--){
 			Packet packet = transitPackets.get(i);
 			packet.timeInQueue++;

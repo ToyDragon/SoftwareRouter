@@ -24,6 +24,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -61,6 +62,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 	JFrame window;
 	JTextArea logArea;
 	JPanel graphicsPanel,mainPanel,leftPanel,rightPanel,buttonPanel;
+	JButton button_removelink;
 	
 	BufferedImage curBuffer,buffer1,buffer2;
 	BufferedImage imgRouter, imgRouterSelected;
@@ -175,10 +177,6 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		rightPanel = new JPanel();
 		buttonPanel = new JPanel();
 		
-		logArea = new JTextArea(35, 17);
-		logArea.setPreferredSize(new Dimension(200, 500));
-		logArea.setEditable(false);
-		
 		leftPanel.setLayout(null);
 		mainPanel.setLayout(null);
 		
@@ -236,8 +234,53 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 				simulation.addDevice(rightDevice);
 			}
         });
+
+        JLabel label_linkinfo = new JLabel("Link Info");
+        label_linkinfo.setBounds(75 - 50, 100, 100, 30);
+        final JLabel label_failrate = new JLabel("Fail Rate: "+ Link.failRate);
+        label_failrate.setBounds(75 - 50, 130, 100, 30);
+        final JTextField field_failrate = new JTextField(""+Link.failRate,10);
+        field_failrate.setBounds(75-50,160,100,30);
         
+        button_removelink = new JButton("Disable Link");
+        button_removelink.setBounds(75-60, 200, 120, 30);
+        
+        button_removelink.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Remove link " + selectedObject);
+				if(selectedObject instanceof Link){
+					//remove link
+					Link link = (Link)selectedObject;
+					link.setDisabled(!link.getDisabled());
+					
+					graphicsPanel.repaint();
+				}
+			}
+        });
+        
+        field_failrate.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				try{
+					double fail_rate = Double.parseDouble(field_failrate.getText());
+					if(fail_rate < 0 || fail_rate > 1){
+						throw new IllegalArgumentException();
+					}
+					Link.failRate = fail_rate;
+					label_failrate.setText("Fail Rate: "+ Link.failRate);
+				}catch(Exception unused){
+					field_failrate.setText("" + Link.failRate);
+				}
+			}
+        });
+
 		leftPanel.add(btnAddRouter);
+		leftPanel.add(label_linkinfo);
+		leftPanel.add(label_failrate);
+		leftPanel.add(field_failrate);
+		leftPanel.add(button_removelink);
 		
 		rightPanel.add(graphicsPanel);
 
@@ -276,6 +319,8 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		//Draw links
 		List<Link> linksToDraw = simulation.linkList;
 		for(Link link : linksToDraw){
+			if(link.getDisabled())continue;
+			
 			if(link.getSource() instanceof Host && link.getTarget() instanceof Router)continue;
 			if(link.getSource().drawID > link.getTarget().drawID)continue;
 			
@@ -535,6 +580,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 				for(Link link : linkList){
 					if(link.getSource().drawID == sourceRouter.drawID && link.getTarget().drawID == destinationRouter.drawID){
 						linkExists = true;
+						link.setDisabled(false);
 						break;
 					}
 				}
