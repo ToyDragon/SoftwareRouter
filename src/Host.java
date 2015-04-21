@@ -8,6 +8,10 @@ public class Host extends NetworkDevice{
 		drawID = drawtally++;
 	}
 	
+	public void sendPacket(Packet packet){
+		outLinks.get(0).addPacket(packet);
+	}
+	
 	public void tick(){
 		//TODO
 	}

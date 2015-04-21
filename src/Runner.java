@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -21,8 +22,11 @@ import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -58,6 +62,8 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 	
 	int[][] routerPositions;
 	int[][] hostPositions;
+	
+	JComboBox comboSource,comboDest;
 	
 	JFrame window;
 	JTextArea logArea;
@@ -177,13 +183,12 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		rightPanel = new JPanel();
 		buttonPanel = new JPanel();
 		
-		leftPanel.setLayout(null);
+		leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
 		mainPanel.setLayout(null);
 		
 		int graphicsWidth = 638;
 		int graphicsHeight = 566;
 
-		leftPanel.setPreferredSize(new Dimension(200, 600));
 		leftPanel.setBounds(0, 0, 150, 600);
 		rightPanel.setPreferredSize(new Dimension(graphicsWidth, graphicsHeight));
 		rightPanel.setBounds(150, 0, graphicsWidth, graphicsHeight);
@@ -208,7 +213,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
                 .addKeyEventPostProcessor(this);
         
         JButton btnAddRouter = new JButton("Add Router");
-        btnAddRouter.setBounds(75 - 50, 40, 100, 30);
+        //btnAddRouter.setBounds(75 - 50, 40, 100, 30);
         btnAddRouter.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -235,15 +240,18 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 			}
         });
 
+        btnAddRouter.setAlignmentX(Component.CENTER_ALIGNMENT);
         JLabel label_linkinfo = new JLabel("Link Info");
-        label_linkinfo.setBounds(75 - 50, 100, 100, 30);
+        label_linkinfo.setAlignmentX(Component.CENTER_ALIGNMENT);
         final JLabel label_failrate = new JLabel("Fail Rate: "+ Link.failRate);
-        label_failrate.setBounds(75 - 50, 130, 100, 30);
+        label_failrate.setAlignmentX(Component.CENTER_ALIGNMENT);
         final JTextField field_failrate = new JTextField(""+Link.failRate,10);
-        field_failrate.setBounds(75-50,160,100,30);
+        field_failrate.setAlignmentX(Component.CENTER_ALIGNMENT);
+        field_failrate.setMaximumSize( field_failrate.getPreferredSize() );
         
         button_removelink = new JButton("Disable Link");
-        button_removelink.setBounds(75-60, 200, 120, 30);
+        //button_removelink.setBounds(75-60, 200, 120, 30);
+        button_removelink.setAlignmentX(Component.CENTER_ALIGNMENT);
         
         button_removelink.addActionListener(new ActionListener(){
 			@Override
@@ -275,12 +283,45 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 				}
 			}
         });
+        
+        JButton buttonSendPacket = new JButton("Send Packet");
+        buttonSendPacket.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				int sourceID = Integer.parseInt(""+comboSource.getSelectedItem());
+				int destID = Integer.parseInt(""+comboDest.getSelectedItem());
+				
+				Packet newPacket = new Packet(destID);
+				((Host)NetworkDevice.getDevice(sourceID)).sendPacket(newPacket);
+				
+				graphicsPanel.repaint();
+			}
+        });
+        buttonSendPacket.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        comboSource = new JComboBox(new String[]{"Temp1","Temp2"});
+        comboSource.setMaximumSize(comboSource.getPreferredSize());
+        comboSource.setAlignmentX(Component.CENTER_ALIGNMENT);
+        comboDest = new JComboBox(new String[]{"Temp1","Temp2"});
+        comboDest.setMaximumSize(comboDest.getPreferredSize());
+        comboDest.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+		leftPanel.add(Box.createVerticalStrut(10));
 		leftPanel.add(btnAddRouter);
+		leftPanel.add(Box.createVerticalStrut(10));
 		leftPanel.add(label_linkinfo);
+		leftPanel.add(Box.createVerticalStrut(10));
 		leftPanel.add(label_failrate);
+		leftPanel.add(Box.createVerticalStrut(10));
 		leftPanel.add(field_failrate);
+		leftPanel.add(Box.createVerticalStrut(10));
 		leftPanel.add(button_removelink);
+		leftPanel.add(Box.createVerticalStrut(10));
+		leftPanel.add(comboSource);
+		leftPanel.add(Box.createVerticalStrut(10));
+		leftPanel.add(comboDest);
+		leftPanel.add(Box.createVerticalStrut(10));
+		leftPanel.add(buttonSendPacket);
 		
 		rightPanel.add(graphicsPanel);
 
@@ -289,8 +330,26 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		
 		window.getContentPane().add(mainPanel);
 		
+		
+		updateHostComboboxes();
 		//window.pack();
 		window.setVisible(true);
+	}
+	
+	public void updateHostComboboxes(){
+		List<NetworkDevice> hosts = simulation.hostDevices;
+		int count = 0;
+		for(NetworkDevice host : hosts){
+			if(!host.isDisabled()) count++;
+		}
+		int i = 0;
+		String[] hostIds = new String[count];
+		for(NetworkDevice host : hosts){
+			if(!host.isDisabled()) hostIds[i++] = "" + host.getID();
+		}
+
+		comboSource.setModel(new JComboBox<>(hostIds).getModel());
+		comboDest.setModel(new JComboBox<>(hostIds).getModel());
 	}
 	
 	public void paintCanvas(Graphics graw){
@@ -358,9 +417,16 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 				ry = (3*y1 + 2*y2)/5;
 			}
 			
+			if(link.hasPackets() || link.getPartnerLink().hasPackets()){
+				g.setColor(Color.PINK);
+				g.fillRect(rx-13,ry-17,32,35);
+				System.out.println("Link has packets!");
+			}
+			
 			g.setColor(Color.GRAY);
 			if(selectedObject == link) g.setColor(Color.YELLOW.darker());
 			g.fillRect(rx - 3, ry - 7, 12, 15);
+			
 			
 			g.setColor(Color.BLACK);
 			g.drawString(""+link.getCost(), rx, ry + 5);
@@ -386,11 +452,15 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		for(NetworkDevice router : routers){
 			int x = routerPositions[router.drawID][0];
 			int y = routerPositions[router.drawID][1];
-			g.setColor(Color.BLACK);
 			if(selectedObject == router)
 				g.drawImage(imgRouterSelected, x-25, y-25, 50, 50, null);
 			else
 				g.drawImage(imgRouter, x-25, y-25, 50, 50, null);
+			
+			g.setColor(Color.GRAY);
+			g.fillRect(x-1, y-12, 15, 15);
+			g.setColor(Color.BLACK);
+			g.drawString(""+router.getID(), x, y);
 		}
 		
 		//Draw hosts
@@ -403,6 +473,11 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 				g.drawImage(imgHostSelected, x-25, y-25, 50, 50, null);
 			else
 				g.drawImage(imgHost, x-25, y-25, 50, 50, null);
+			
+			g.setColor(Color.GRAY);
+			g.fillRect(x-1, y-12, 15, 15);
+			g.setColor(Color.BLACK);
+			g.drawString(""+host.getID(), x, y);
 		}
 		
 		canvasg.drawImage(curBuffer, 0, 0, null);

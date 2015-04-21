@@ -61,6 +61,10 @@ public class Link {
 		}
 	}
 	
+	public boolean hasPackets(){
+		return !transitPackets.isEmpty();
+	}
+	
 	public void tick(){	
 		if(isDisabled)return;
 		/*for(int i = transitPackets.size()-1; i >= 0; i--){

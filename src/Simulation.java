@@ -45,6 +45,7 @@ public class Simulation {
 	}
 	
 	public void tick(){
+		System.out.println("Ticked!");
 		runner.graphicsPanel.repaint();
 		if(runner.isPaused())return;
 		
