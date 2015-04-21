@@ -277,7 +277,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		List<Link> linksToDraw = simulation.linkList;
 		for(Link link : linksToDraw){
 			if(link.getSource() instanceof Host && link.getTarget() instanceof Router)continue;
-			if(link.getSource().ID > link.getTarget().ID)continue;
+			if(link.getSource().drawID > link.getTarget().drawID)continue;
 			
 			int x1 = 0;
 			int y1 = 0;
@@ -285,20 +285,20 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 			int y2 = 0;
 			
 			if(link.getSource() instanceof Router){
-				x1 = routerPositions[link.getSource().ID][0];
-				y1 = routerPositions[link.getSource().ID][1];
+				x1 = routerPositions[link.getSource().drawID][0];
+				y1 = routerPositions[link.getSource().drawID][1];
 			}
 			if(link.getSource() instanceof Host){
-				x1 = hostPositions[link.getSource().ID][0];
-				y1 = hostPositions[link.getSource().ID][1];
+				x1 = hostPositions[link.getSource().drawID][0];
+				y1 = hostPositions[link.getSource().drawID][1];
 			}
 			if(link.getTarget() instanceof Router){
-				x2 = routerPositions[link.getTarget().ID][0];
-				y2 = routerPositions[link.getTarget().ID][1];
+				x2 = routerPositions[link.getTarget().drawID][0];
+				y2 = routerPositions[link.getTarget().drawID][1];
 			}
 			if(link.getTarget() instanceof Host){
-				x2 = hostPositions[link.getTarget().ID][0];
-				y2 = hostPositions[link.getTarget().ID][1];
+				x2 = hostPositions[link.getTarget().drawID][0];
+				y2 = hostPositions[link.getTarget().drawID][1];
 			}
 			
 			g.setColor(Color.BLACK);
@@ -308,7 +308,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 			int rx = (x1+x2)/2;
 			int ry = (y1+y2)/2;
 			
-			if(link.getTarget().ID - link.getSource().ID == routers.size()/2){
+			if(link.getTarget().drawID - link.getSource().drawID == routers.size()/2){
 				rx = (3*x1 + 2*x2)/5;
 				ry = (3*y1 + 2*y2)/5;
 			}
@@ -325,8 +325,8 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		if(drawingLink && selectedObject instanceof Router){
 			Router router = (Router)selectedObject;
 			
-			int x1 = routerPositions[router.ID][0];
-			int y1 = routerPositions[router.ID][1];
+			int x1 = routerPositions[router.drawID][0];
+			int y1 = routerPositions[router.drawID][1];
 			int x2 = mousePosition[0];
 			int y2 = mousePosition[1];
 			
@@ -339,8 +339,8 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		
 		//Draw routers
 		for(NetworkDevice router : routers){
-			int x = routerPositions[router.ID][0];
-			int y = routerPositions[router.ID][1];
+			int x = routerPositions[router.drawID][0];
+			int y = routerPositions[router.drawID][1];
 			g.setColor(Color.BLACK);
 			if(selectedObject == router)
 				g.drawImage(imgRouterSelected, x-25, y-25, 50, 50, null);
@@ -351,8 +351,8 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		//Draw hosts
 		for(NetworkDevice hostRaw : hosts){
 			Host host = (Host)hostRaw;
-			int x = hostPositions[host.ID][0];
-			int y = hostPositions[host.ID][1];
+			int x = hostPositions[host.drawID][0];
+			int y = hostPositions[host.drawID][1];
 			g.setColor(Color.BLACK);
 			if(selectedObject == host)
 				g.drawImage(imgHostSelected, x-25, y-25, 50, 50, null);
@@ -473,14 +473,14 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		
 		for(Link link : simulation.linkList){
 			if(link.getSource() instanceof Host && link.getTarget() instanceof Router)continue;
-			if(link.getSource().ID > link.getTarget().ID)continue;
-			double[] pointa = {routerPositions[link.getSource().ID][0],routerPositions[link.getSource().ID][1]};
-			double[] pointb = {routerPositions[link.getTarget().ID][0],routerPositions[link.getTarget().ID][1]};
+			if(link.getSource().drawID > link.getTarget().drawID)continue;
+			double[] pointa = {routerPositions[link.getSource().drawID][0],routerPositions[link.getSource().drawID][1]};
+			double[] pointb = {routerPositions[link.getTarget().drawID][0],routerPositions[link.getTarget().drawID][1]};
 			if(link.getSource() instanceof Host){
-				pointa = new double[]{hostPositions[link.getSource().ID][0],hostPositions[link.getSource().ID][1]};
+				pointa = new double[]{hostPositions[link.getSource().drawID][0],hostPositions[link.getSource().drawID][1]};
 			}
 			if(link.getTarget() instanceof Host){
-				pointb = new double[]{hostPositions[link.getSource().ID][0],hostPositions[link.getSource().ID][1]};
+				pointb = new double[]{hostPositions[link.getSource().drawID][0],hostPositions[link.getSource().drawID][1]};
 			}
 			
 			double distance = LineToPointDistance2D(pointa, pointb, clickPoint);
@@ -491,8 +491,8 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		
 		for(NetworkDevice router : simulation.networkDevices){
 			
-			int rx = routerPositions[router.ID][0];
-			int ry = routerPositions[router.ID][1];
+			int rx = routerPositions[router.drawID][0];
+			int ry = routerPositions[router.drawID][1];
 
 			int ex = e.getX();
 			int ey = e.getY();
@@ -516,8 +516,8 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 			Router destinationRouter = null;
 			for(NetworkDevice router : simulation.networkDevices){
 				
-				int rx = routerPositions[router.ID][0];
-				int ry = routerPositions[router.ID][1];
+				int rx = routerPositions[router.drawID][0];
+				int ry = routerPositions[router.drawID][1];
 
 				int ex = e.getX();
 				int ey = e.getY();
@@ -533,7 +533,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 				//If this link doesnt exist add it
 				boolean linkExists = false;
 				for(Link link : linkList){
-					if(link.getSource().ID == sourceRouter.ID && link.getTarget().ID == destinationRouter.ID){
+					if(link.getSource().drawID == sourceRouter.drawID && link.getTarget().drawID == destinationRouter.drawID){
 						linkExists = true;
 						break;
 					}

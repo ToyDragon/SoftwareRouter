@@ -1,12 +1,12 @@
 
 public class Router extends NetworkDevice{
 
-	private static int tally = 0;
+	private static int drawtally = 0;
 	boolean hasTableChanged;
 	
 	public Router(){
 		super();
-		ID = tally++;
+		drawID = drawtally++;
 	}
 	
 	public void tick() {

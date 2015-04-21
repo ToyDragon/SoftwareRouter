@@ -3,13 +3,16 @@ import java.util.List;
 
 
 public abstract class NetworkDevice {
+	private static int tally = 0;
 	
-	protected int ID;
+	private int ID;
+	protected int drawID;
 	List<Link> outLinks;
 	List<Link> inLinks;
 	
 	public NetworkDevice()
 	{
+		ID = tally++;
 		outLinks = new ArrayList<Link>();
 		inLinks = new ArrayList<Link>();
 	}

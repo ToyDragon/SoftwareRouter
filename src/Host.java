@@ -1,11 +1,11 @@
 
 public class Host extends NetworkDevice{
 
-	private static int tally = 0;
+	private static int drawtally = 0;
 	
 	public Host(){
 		super();
-		ID = tally++;
+		drawID = drawtally++;
 	}
 	
 	public void tick(){
