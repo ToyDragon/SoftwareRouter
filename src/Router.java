@@ -1,12 +1,31 @@
 
+import java.util.ArrayList;
+
 public class Router extends NetworkDevice{
 
 	private static int drawtally = 0;
 	boolean hasTableChanged;
+	private ArrayList<RoutingRow> neighborVectors;
+	private Pair[] table;
 	
 	public Router(){
 		super();
 		drawID = drawtally++;
+	}
+	
+	public void initializeTable(int n)
+	{
+		table = new Pair[n];
+		neighborVectors = new ArrayList<RoutingRow>();
+	}
+	
+	public void sendDV()
+	{
+		//for each link
+		{
+			Link l = new Link(this,this,1);
+			RoutingPacket temp = new RoutingPacket(l.getTarget().getID(),table);
+		}
 	}
 	
 	public void tick() {
