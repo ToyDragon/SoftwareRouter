@@ -1,17 +1,17 @@
 
 public class Packet {
 	
-	private final int des;
+	private final int dest;
 	int timeInQueue;
 	
-	public Packet(int des)
+	public Packet(int dest)
 	{
-		this.des = des;
+		this.dest = dest;
 	}
 	
-	boolean isDes(int k)
+	public int getDest()
 	{
-		return k == des;
+		return dest;
 	}
 
 }

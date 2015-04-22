@@ -17,7 +17,35 @@ public class Router extends NetworkDevice{
 	{
 		table = new Pair[n];
 		neighborVectors = new ArrayList<RoutingRow>();
+		
+		for(Link l : outLinks)
+		{
+			table[l.getTarget().getID()].dest = l;
+			table[l.getTarget().getID()].weight = l.getCost();
+		}
 		sendDV();
+	}
+	
+	public void process(Packet p)
+	{
+		if(this.getID() == p.getDest())
+		{
+			boolean found = false;
+			for(RoutingRow r : neighborVectors)
+			{
+				if(r.source == ((RoutingPacket)p).getPayload().source)
+				{
+					r = ((RoutingPacket)p).getPayload();
+					found = true;
+				}				
+			}
+			if(!found)
+				neighborVectors.add(((RoutingPacket)p).getPayload());
+			updateTable();
+		}
+		else
+			table[p.getDest()].dest.addPacket(p);
+		
 	}
 	
 	private void updateTable()
@@ -45,6 +73,7 @@ public class Router extends NetworkDevice{
 				}
 			}
 		}
+	}
 	
 	public void sendDV()
 	{
@@ -54,7 +83,7 @@ public class Router extends NetworkDevice{
 		}
 	}
 	
-	public void tick() {
+	/*public void tick() {
 		
 		for(Link sourceLink : inLinks){
 			Packet toSend = sourceLink.peekHead();
@@ -80,7 +109,7 @@ public class Router extends NetworkDevice{
 				}
 			}
 		}
-	}
+	}*/
 	
 	public RoutingPacket getRoutingPacket(){
 		//TODO

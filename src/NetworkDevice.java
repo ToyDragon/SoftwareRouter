@@ -59,8 +59,9 @@ public abstract class NetworkDevice {
 		return outLinks.remove(link) || inLinks.remove(link);
 	}
 	
-	abstract void tick();
-
+	public void process(Packet p)
+	{}
+	
 	public static NetworkDevice getDevice(int ID){
 		return idMap.get(ID);
 	}

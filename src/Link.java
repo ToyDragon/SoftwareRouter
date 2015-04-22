@@ -15,12 +15,10 @@ public class Link {
 	private boolean isDisabled;
 	private Link partnerLink;
 	private MinHeap<Packet> transitPackets;
-	private Queue<Packet> arrivedPackets;
 		
 	public Link(NetworkDevice source, NetworkDevice target, int cost, Clock c)
 	{
 		transitPackets = new MinHeap<Packet>();
-		arrivedPackets = new LinkedList<Packet>();
 		isBusy = false;
 		clock = c;
 		this.linkCost = cost;

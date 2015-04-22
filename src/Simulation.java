@@ -49,12 +49,12 @@ public class Simulation {
 		if(runner.isPaused())return;
 		
 		//tick all devices and links
-		for(NetworkDevice device : hostDevices){
+		/*for(NetworkDevice device : hostDevices){
 			device.tick();
-		}
-		for(NetworkDevice device : networkDevices){
+		}*/
+		/*for(NetworkDevice device : networkDevices){
 			device.tick();
-		}
+		}*/
 		for(Link link : linkList){
 			link.tick();
 		}
