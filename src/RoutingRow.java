@@ -12,5 +12,12 @@ public class RoutingRow {
 			vector[i] = new Pair(); 
 		}
 	}
-
+	
+	public RoutingRow(int src, Pair[] v)
+	{
+		source = src;
+		vector = new Pair[v.length];
+		for(int i = 0; i < v.length; i++)
+			vector[i] = v[i];
+	}
 }
