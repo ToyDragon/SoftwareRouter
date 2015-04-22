@@ -65,18 +65,8 @@ public class Link {
 		return !transitPackets.isEmpty();
 	}
 	
-	public void tick(){	
-		if(isDisabled)return;
-		/*for(int i = transitPackets.size()-1; i >= 0; i--){
-			Packet packet = transitPackets.get(i);
-			packet.timeInQueue++;
-			
-			if(packet.timeInQueue >= linkCost){
-				transitPackets.remove(i);
-				arrivedPackets.offer(packet);
-			}
-		}*/
-
+	public void tick()
+	{	
 		boolean b = true;
 		while(b)
 		{
@@ -85,7 +75,7 @@ public class Link {
 			{
 				if(!(transitPackets.isEmpty()) && transitPackets.peek() <= clock.time())
 				{
-					arrivedPackets.offer(transitPackets.extract());
+					target.process(transitPackets.extract());
 					b = true;
 				}
 			}
@@ -94,7 +84,6 @@ public class Link {
 				System.out.println(e.getMessage());
 			}
 		}
-		isBusy = false;
 	}
 	
 	public Packet peekHead(){
