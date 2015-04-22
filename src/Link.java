@@ -9,7 +9,7 @@ public class Link {
 	private final NetworkDevice source;
 	private final NetworkDevice target;
 	private int linkCost;
-	private int clock;
+	private Clock clock;
 	public static double failRate;
 	private boolean isBusy;
 	private boolean isDisabled;
@@ -17,12 +17,12 @@ public class Link {
 	private MinHeap<Packet> transitPackets;
 	private Queue<Packet> arrivedPackets;
 		
-	public Link(NetworkDevice source, NetworkDevice target, int cost)
+	public Link(NetworkDevice source, NetworkDevice target, int cost, Clock c)
 	{
 		transitPackets = new MinHeap<Packet>();
 		arrivedPackets = new LinkedList<Packet>();
 		isBusy = false;
-		clock = 0;
+		clock = c;
 		this.linkCost = cost;
 		this.target = target;		
 		this.source = source;
@@ -57,7 +57,7 @@ public class Link {
 			isBusy = true;
 			
 			//packet.timeInQueue = 0;
-			transitPackets.add(clock + linkCost, packet);
+			transitPackets.add(clock.time() + linkCost, packet);
 		}
 	}
 	
@@ -76,14 +76,14 @@ public class Link {
 				arrivedPackets.offer(packet);
 			}
 		}*/
-		clock++;
+
 		boolean b = true;
 		while(b)
 		{
 			b = false;
 			try
 			{
-				if(!(transitPackets.isEmpty()) && transitPackets.peek() <= clock)
+				if(!(transitPackets.isEmpty()) && transitPackets.peek() <= clock.time())
 				{
 					arrivedPackets.offer(transitPackets.extract());
 					b = true;

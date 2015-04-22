@@ -17,6 +17,7 @@ public class Router extends NetworkDevice{
 	{
 		table = new Pair[n];
 		neighborVectors = new ArrayList<RoutingRow>();
+		sendDV();
 	}
 	
 	public void sendDV()
