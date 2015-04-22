@@ -1,7 +1,4 @@
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 
 public class Link {
 
@@ -75,8 +72,8 @@ public class Link {
 		if(k <= 0)
 			throw new IllegalArgumentException();
 		linkCost = k;
-		source.updateTable();
-		target.updateTable();
+		source.sendDV();
+		target.sendDV();
 	}
 	
 	public int getCost()

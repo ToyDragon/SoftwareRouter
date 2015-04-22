@@ -8,7 +8,4 @@ public class Host extends NetworkDevice{
 		ID = tally++;
 	}
 	
-	public void tick(){
-		//TODO
-	}
 }

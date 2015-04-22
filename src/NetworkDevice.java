@@ -39,6 +39,6 @@ public abstract class NetworkDevice {
 		return outLinks.remove(link) || inLinks.remove(link);
 	}
 	
-	private void updateTable()
+	public void sendDV()
 	{}
 }

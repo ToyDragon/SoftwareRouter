@@ -1,5 +1,7 @@
 
 import java.util.ArrayList;
+import java.io.PrintWriter;
+import java.io.FileNotFoundException;
 
 public class Router extends NetworkDevice{
 
@@ -17,6 +19,13 @@ public class Router extends NetworkDevice{
 	{
 		table = new Pair[n];
 		neighborVectors = new ArrayList<RoutingRow>();
+		
+		for(Link l : outLinks)
+		{
+			table[l.getTarget().getID()].dest = l;
+			table[l.getTarget().getID()].weight = l.getCost();
+		}
+		sendDV();
 	}
 	
 	public void sendDV()
@@ -127,18 +136,6 @@ public class Router extends NetworkDevice{
 		}
 	}*/
 	
-	public RoutingPacket getRoutingPacket(){
-		//TODO
-		//create and return a meaningful routing packet. maybe just a copy of the routing table?
-		return null;
-	}
-	
-	public void updateRoutingTable(RoutingPacket packet){
-		//TODO
-		//read packet and update our routing table appropriately
-		//if it changed, set hasTableChanged to true, which will trigger new routing packets to send in next tick
-	}
-	
 	public Link getDestinationLink(Packet packet){
 		//TODO
 		//use routing table to determine where packet should go, return outbound link
@@ -167,6 +164,22 @@ public class Router extends NetworkDevice{
 		//Update routing table and set hasTableChanged to true if it has changed
 		
 		return value;
+	}
+	
+	public void terminate()
+	{
+		try
+		{
+			PrintWriter out = new PrintWriter("Router"+getID());
+			out.println("Source|Destination|Cost|Next" );
+			for(int i = 0; i < table.length; i++)
+			{
+				out.println(getID() + " | " + i + " | " + table[i].weight + " | " + table[i].dest.getTarget().getID() );
+			}
+		}
+		catch(FileNotFoundException e)
+		{
+		}
 	}
 	
 }
