@@ -55,6 +55,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 	int amtLinks;
 	int amtHosts;
 	double failRate;
+	Clock clock;
 	ArrayList<NetworkDevice> hostList;
 	ArrayList<NetworkDevice> routerList;
 	ArrayList<Link> linkList;
@@ -85,6 +86,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		
 		uiScanner = new Scanner(System.in);
 		simulation = new Simulation(this);
+		clock = new Clock();
 		
 		mousePosition = new int[2];
 		
@@ -95,6 +97,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 			imgHost = ImageIO.read(new File("imgs/server.png"));
 			imgHostSelected = ImageIO.read(new File("imgs/serverSelected.png"));
 		}catch(Exception e){}
+		
 		
 		initNetwork();
 		
@@ -168,8 +171,8 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		for(int i = 0; i < rawLinks.length; i++){
 			NetworkDevice leftDevice = NetworkDevice.getDevice(rawLinks[i][0]);
 			NetworkDevice rightDevice = NetworkDevice.getDevice(rawLinks[i][1]);
-			Link leftLink = new Link(leftDevice, rightDevice, rawLinks[i][2]);
-			Link rightLink = new Link(rightDevice, leftDevice, rawLinks[i][2]);
+			Link leftLink = new Link(leftDevice, rightDevice, rawLinks[i][2], clock);
+			Link rightLink = new Link(rightDevice, leftDevice, rawLinks[i][2], clock);
 
 			leftLink.setPartnerLink(rightLink);
 			rightLink.setPartnerLink(leftLink);
@@ -723,8 +726,8 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 				
 				if(!linkExists){
 					//add new link
-					Link leftLink = new Link(sourceDevice, destinationDevice, 1);
-					Link rightLink = new Link(destinationDevice, sourceDevice, 1);
+					Link leftLink = new Link(sourceDevice, destinationDevice, 1, clock);
+					Link rightLink = new Link(destinationDevice, sourceDevice, 1, clock);
 
 					leftLink.setPartnerLink(rightLink);
 					rightLink.setPartnerLink(leftLink);

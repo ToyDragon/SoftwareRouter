@@ -55,6 +55,8 @@ public class Simulation {
 		/*for(NetworkDevice device : networkDevices){
 			device.tick();
 		}*/
+		
+		runner.clock.tick();
 		for(Link link : linkList){
 			link.tick();
 		}
