@@ -20,6 +20,32 @@ public class Router extends NetworkDevice{
 		sendDV();
 	}
 	
+	private void updateTable()
+	{
+		boolean updated = false;
+		Pair[] temp = new Pair[table.length];
+		
+		for(int i = 0; i < temp.length; i++)
+			temp[i] = new Pair();
+		for(RoutingRow r : neighborVectors)
+		{
+			for(Link l : outLinks)
+			{
+				if(l.getTarget().getID() == r.source)
+				{
+					for(int i = 0; i < temp.length; i++)
+					{
+						if(r.vector[i].weight + l.getCost() < temp[i].weight)
+						{
+							temp[i].weight = r.vector[i].weight + l.getCost();
+							temp[i].dest = l; 
+						}
+					}
+					break;
+				}
+			}
+		}
+	
 	public void sendDV()
 	{
 		for(Link l : outLinks)
@@ -29,17 +55,6 @@ public class Router extends NetworkDevice{
 	}
 	
 	public void tick() {
-		if(hasTableChanged){
-			RoutingPacket routingPacket = getRoutingPacket();
-			
-			if(routingPacket != null){
-				for(Link outLink : outLinks){
-					if(!outLink.isBusy()){
-						outLink.addPacket(routingPacket);
-					}
-				}
-			}
-		}
 		
 		for(Link sourceLink : inLinks){
 			Packet toSend = sourceLink.peekHead();
@@ -73,12 +88,7 @@ public class Router extends NetworkDevice{
 		return null;
 	}
 	
-	public void updateRoutingTable(RoutingPacket packet){
-		//TODO
-		//read packet and update our routing table appropriately
-		//if it changed, set hasTableChanged to true, which will trigger new routing packets to send in next tick
-	}
-	
+
 	public Link getDestinationLink(Packet packet){
 		//TODO
 		//use routing table to determine where packet should go, return outbound link
