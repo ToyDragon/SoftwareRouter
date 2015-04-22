@@ -85,6 +85,8 @@ public class Link {
 		if(k <= 0)
 			throw new IllegalArgumentException();
 		linkCost = k;
+		source.sendDV();
+		target.sendDV();
 	}
 	
 	public int getCost()

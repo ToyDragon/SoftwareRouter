@@ -62,6 +62,9 @@ public abstract class NetworkDevice {
 	public void process(Packet p)
 	{}
 	
+	public void sendDV()
+	{}
+	
 	public static NetworkDevice getDevice(int ID){
 		return idMap.get(ID);
 	}
