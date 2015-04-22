@@ -46,7 +46,8 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 	boolean isPaused;
 	
 	boolean drawingLink;
-	int[] mousePosition;
+	boolean movingDevice,spacePressed;
+	int[] mousePosition, startPos, deviceStart;
 	
 	Scanner uiScanner;
 	Simulation simulation;
@@ -63,7 +64,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 	int[][] routerPositions;
 	int[][] hostPositions;
 	
-	JComboBox comboSource,comboDest;
+	JComboBox<String> comboSource,comboDest;
 	
 	JFrame window;
 	JTextArea logArea;
@@ -113,46 +114,60 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		routerList = new ArrayList<NetworkDevice>(amtRouters);
 		hostList = new ArrayList<NetworkDevice>(amtRouters);
 		linkList = new ArrayList<Link>(amtLinks);
-		for(int i = 0; i < amtRouters; i++){
-			
-			NetworkDevice leftDevice = new Router();
-			NetworkDevice rightDevice = new Host();
-			
-			routerList.add(leftDevice);
-			hostList.add(rightDevice);
-			
-			Link leftLink = new Link(leftDevice, rightDevice, 1);
-			Link rightLink = new Link(rightDevice, leftDevice, 1);
+		
+		int[][] rawRouters = {
+				{212,100},
+				{324,100},
+				{436,100},
+				{212,450},
+				{324,450},
+				{436,450}
+		};
+		
+		int[][] rawHosts = {
+				{100,100},
+				{550,100},
+				{100,450},
+				{550,450}
+		};
 
-			leftLink.setPartnerLink(rightLink);
-			rightLink.setPartnerLink(leftLink);
-
-			leftDevice.addOutLink(leftLink);
-			leftDevice.addInLink(rightLink);
-			rightDevice.addOutLink(rightLink);
-			rightDevice.addInLink(leftLink);
-			
-			linkList.add(leftLink);
-			linkList.add(rightLink);
+		for(int i = 0; i < rawRouters.length; i++){
+			Router router = new Router();
+			router.drawx = rawRouters[i][0];
+			router.drawy = rawRouters[i][1];
+			routerList.add(router);
 		}
+		
+		for(int i = 0; i < rawHosts.length; i++){
+			Host host = new Host();
+			host.drawx = rawHosts[i][0];
+			host.drawy = rawHosts[i][1];
+			hostList.add(host);
+		}
+		
 		simulation.setNetworkDevices(routerList);
 		simulation.setHostDevices(hostList);
 		
 		int[][] rawLinks = {
 				{0,1,1},
 				{1,2,1},
-				{2,3,1},
 				{3,4,1},
 				{4,5,1},
-				{5,0,1},
-				{0,3,2},
-				{1,4,2},
-				{2,5,2}
+				{0,3,1},
+				{1,3,1},
+				{1,5,1},
+				{1,4,1},
+				{2,4,1},
+				{0,6,1},
+				{2,7,1},
+				{8,3,1},
+				{5,9,1}
 		};
+		
 		amtLinks = rawLinks.length;
 		for(int i = 0; i < rawLinks.length; i++){
-			NetworkDevice leftDevice = routerList.get(rawLinks[i][0]);
-			NetworkDevice rightDevice = routerList.get(rawLinks[i][1]);
+			NetworkDevice leftDevice = NetworkDevice.getDevice(rawLinks[i][0]);
+			NetworkDevice rightDevice = NetworkDevice.getDevice(rawLinks[i][1]);
 			Link leftLink = new Link(leftDevice, rightDevice, rawLinks[i][2]);
 			Link rightLink = new Link(rightDevice, leftDevice, rawLinks[i][2]);
 
@@ -217,30 +232,56 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
         btnAddRouter.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				NetworkDevice device = null;
+				for(int i = simulation.networkDevices.size()-1; i>=0; i--){
+					if(simulation.networkDevices.get(i).isDisabled()){
+						device = simulation.networkDevices.get(i);
+						device.setDisabled(false);
+						break;
+					}
+				}
 				
-				NetworkDevice leftDevice = new Router();
-				NetworkDevice rightDevice = new Host();
+				if(device == null){
+					device = new Router();
+					simulation.addDevice(device);
+				}
 				
-				Link leftLink = new Link(leftDevice, rightDevice, 1);
-				Link rightLink = new Link(rightDevice, leftDevice, 1);
-
-				leftLink.setPartnerLink(rightLink);
-				rightLink.setPartnerLink(leftLink);
-
-				leftDevice.addOutLink(leftLink);
-				leftDevice.addInLink(rightLink);
-				rightDevice.addOutLink(rightLink);
-				rightDevice.addInLink(leftLink);
+				device.drawx = 50;
+				device.drawy = 300;
 				
-				linkList.add(leftLink);
-				linkList.add(rightLink);
+				graphicsPanel.repaint();
+			}
+        });
+        
+        JButton btnAddHost = new JButton("Add Host");
+        //btnAddRouter.setBounds(75 - 50, 40, 100, 30);
+        btnAddHost.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				NetworkDevice device = null;
+				for(int i = simulation.hostDevices.size()-1; i>=0; i--){
+					if(simulation.hostDevices.get(i).isDisabled()){
+						device = simulation.hostDevices.get(i);
+						device.setDisabled(false);
+						updateHostComboboxes();
+						break;
+					}
+				}
 				
-				simulation.addDevice(leftDevice);
-				simulation.addDevice(rightDevice);
+				if(device == null){
+					device = new Host();
+					simulation.addDevice(device);
+				}
+				
+				device.drawx = 50;
+				device.drawy = 300;
+				
+				graphicsPanel.repaint();
 			}
         });
 
         btnAddRouter.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnAddHost.setAlignmentX(Component.CENTER_ALIGNMENT);
         JLabel label_linkinfo = new JLabel("Link Info");
         label_linkinfo.setAlignmentX(Component.CENTER_ALIGNMENT);
         final JLabel label_failrate = new JLabel("Fail Rate: "+ Link.failRate);
@@ -249,7 +290,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
         field_failrate.setAlignmentX(Component.CENTER_ALIGNMENT);
         field_failrate.setMaximumSize( field_failrate.getPreferredSize() );
         
-        button_removelink = new JButton("Disable Link");
+        button_removelink = new JButton("Disable Device");
         //button_removelink.setBounds(75-60, 200, 120, 30);
         button_removelink.setAlignmentX(Component.CENTER_ALIGNMENT);
         
@@ -261,6 +302,16 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 					//remove link
 					Link link = (Link)selectedObject;
 					link.setDisabled(!link.getDisabled());
+					link.getPartnerLink().setDisabled(link.getDisabled());
+					
+					graphicsPanel.repaint();
+				}
+				if(selectedObject instanceof NetworkDevice){
+
+					NetworkDevice device = (NetworkDevice)selectedObject;
+					device.setDisabled(!device.isDisabled());
+					
+					updateHostComboboxes();
 					
 					graphicsPanel.repaint();
 				}
@@ -270,7 +321,6 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
         field_failrate.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				try{
 					double fail_rate = Double.parseDouble(field_failrate.getText());
 					if(fail_rate < 0 || fail_rate > 1){
@@ -299,15 +349,17 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
         });
         buttonSendPacket.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        comboSource = new JComboBox(new String[]{"Temp1","Temp2"});
+        comboSource = new JComboBox<String>(new String[]{"Temp1","Temp2"});
         comboSource.setMaximumSize(comboSource.getPreferredSize());
         comboSource.setAlignmentX(Component.CENTER_ALIGNMENT);
-        comboDest = new JComboBox(new String[]{"Temp1","Temp2"});
+        comboDest = new JComboBox<String>(new String[]{"Temp1","Temp2"});
         comboDest.setMaximumSize(comboDest.getPreferredSize());
         comboDest.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-		leftPanel.add(Box.createVerticalStrut(10));
+        leftPanel.add(Box.createVerticalStrut(10));
 		leftPanel.add(btnAddRouter);
+		leftPanel.add(Box.createVerticalStrut(10));
+		leftPanel.add(btnAddHost);
 		leftPanel.add(Box.createVerticalStrut(10));
 		leftPanel.add(label_linkinfo);
 		leftPanel.add(Box.createVerticalStrut(10));
@@ -364,58 +416,25 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		List<NetworkDevice> routers = simulation.networkDevices;
 		List<NetworkDevice> hosts = simulation.hostDevices;
 		
-		routerPositions = new int[routers.size()][2];
-		hostPositions = new int[routers.size()][2];
-		for(int i = 0; i < routers.size(); i++){
-			double angle = i * Math.PI*2/routers.size();
-			routerPositions[i][0] = rightPanel.getWidth()/2 + (int)(Math.cos(angle)*rightPanel.getWidth()*3/13);
-			routerPositions[i][1] = rightPanel.getHeight()/2 + (int)(Math.sin(angle)*rightPanel.getHeight()*3/13);
-			
-			hostPositions[i][0] = rightPanel.getWidth()/2 + (int)(Math.cos(angle)*rightPanel.getWidth()*4/9);
-			hostPositions[i][1] = rightPanel.getHeight()/2 + (int)(Math.sin(angle)*rightPanel.getHeight()*4/9);
-		}
-		
 		//Draw links
 		List<Link> linksToDraw = simulation.linkList;
-		for(Link link : linksToDraw){
+		for(int i = linksToDraw.size()-1; i>=0; i--){
+			Link link = linksToDraw.get(i);
 			if(link.getDisabled())continue;
 			
-			if(link.getSource() instanceof Host && link.getTarget() instanceof Router)continue;
-			if(link.getSource().drawID > link.getTarget().drawID)continue;
+			if(link.getSource().getID() > link.getTarget().getID())continue;
 			
-			int x1 = 0;
-			int y1 = 0;
-			int x2 = 0;
-			int y2 = 0;
-			
-			if(link.getSource() instanceof Router){
-				x1 = routerPositions[link.getSource().drawID][0];
-				y1 = routerPositions[link.getSource().drawID][1];
-			}
-			if(link.getSource() instanceof Host){
-				x1 = hostPositions[link.getSource().drawID][0];
-				y1 = hostPositions[link.getSource().drawID][1];
-			}
-			if(link.getTarget() instanceof Router){
-				x2 = routerPositions[link.getTarget().drawID][0];
-				y2 = routerPositions[link.getTarget().drawID][1];
-			}
-			if(link.getTarget() instanceof Host){
-				x2 = hostPositions[link.getTarget().drawID][0];
-				y2 = hostPositions[link.getTarget().drawID][1];
-			}
+			int x1 = link.getSource().drawx;
+			int y1 = link.getSource().drawy;
+			int x2 = link.getTarget().drawx;
+			int y2 = link.getTarget().drawy;
 			
 			g.setColor(Color.BLACK);
 			if(selectedObject == link) g.setColor(Color.GREEN);
 			g.drawLine(x1, y1, x2, y2);
 			
-			int rx = (x1+x2)/2;
-			int ry = (y1+y2)/2;
-			
-			if(link.getTarget().drawID - link.getSource().drawID == routers.size()/2){
-				rx = (3*x1 + 2*x2)/5;
-				ry = (3*y1 + 2*y2)/5;
-			}
+			int rx = (x1*2+x2)/3;
+			int ry = (y1*2+y2)/3;
 			
 			if(link.hasPackets() || link.getPartnerLink().hasPackets()){
 				g.setColor(Color.PINK);
@@ -433,11 +452,11 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		}
 		
 		//Draw new link
-		if(drawingLink && selectedObject instanceof Router){
-			Router router = (Router)selectedObject;
+		if(drawingLink && selectedObject instanceof NetworkDevice){
+			NetworkDevice device = (NetworkDevice)selectedObject;
 			
-			int x1 = routerPositions[router.drawID][0];
-			int y1 = routerPositions[router.drawID][1];
+			int x1 = device.drawx;
+			int y1 = device.drawy;
 			int x2 = mousePosition[0];
 			int y2 = mousePosition[1];
 			
@@ -450,8 +469,9 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		
 		//Draw routers
 		for(NetworkDevice router : routers){
-			int x = routerPositions[router.drawID][0];
-			int y = routerPositions[router.drawID][1];
+			if(router.isDisabled())continue;
+			int x = router.drawx;
+			int y = router.drawy;
 			if(selectedObject == router)
 				g.drawImage(imgRouterSelected, x-25, y-25, 50, 50, null);
 			else
@@ -465,9 +485,10 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		
 		//Draw hosts
 		for(NetworkDevice hostRaw : hosts){
+			if(hostRaw.isDisabled())continue;
 			Host host = (Host)hostRaw;
-			int x = hostPositions[host.drawID][0];
-			int y = hostPositions[host.drawID][1];
+			int x = host.drawx;
+			int y = host.drawy;
 			g.setColor(Color.BLACK);
 			if(selectedObject == host)
 				g.drawImage(imgHostSelected, x-25, y-25, 50, 50, null);
@@ -592,27 +613,20 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		selectedObject = null;
 		
 		for(Link link : simulation.linkList){
-			if(link.getSource() instanceof Host && link.getTarget() instanceof Router)continue;
-			if(link.getSource().drawID > link.getTarget().drawID)continue;
-			double[] pointa = {routerPositions[link.getSource().drawID][0],routerPositions[link.getSource().drawID][1]};
-			double[] pointb = {routerPositions[link.getTarget().drawID][0],routerPositions[link.getTarget().drawID][1]};
-			if(link.getSource() instanceof Host){
-				pointa = new double[]{hostPositions[link.getSource().drawID][0],hostPositions[link.getSource().drawID][1]};
-			}
-			if(link.getTarget() instanceof Host){
-				pointb = new double[]{hostPositions[link.getSource().drawID][0],hostPositions[link.getSource().drawID][1]};
-			}
-			
+			if(link.getSource().getID() > link.getTarget().getID())continue;
+			double[] pointa = {link.getSource().drawx,link.getSource().drawy};
+			double[] pointb = {link.getTarget().drawx,link.getTarget().drawy};
+
 			double distance = LineToPointDistance2D(pointa, pointb, clickPoint);
 			if(distance < 15){
 				selectedObject = link;
 			}
 		}
-		
-		for(NetworkDevice router : simulation.networkDevices){
-			
-			int rx = routerPositions[router.drawID][0];
-			int ry = routerPositions[router.drawID][1];
+
+		for(NetworkDevice device : simulation.networkDevices){
+			if(device.isDisabled())continue;
+			int rx = device.drawx;
+			int ry = device.drawy;
 
 			int ex = e.getX();
 			int ey = e.getY();
@@ -620,9 +634,38 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 			double distance = Math.sqrt(Math.pow(rx-ex, 2) + Math.pow(ry-ey, 2));
 			
 			if(distance < 25){
-				selectedObject = router;
+				selectedObject = device;
 				mousePosition = new int[]{e.getX(), e.getY()};
-				drawingLink = true;
+				if(spacePressed){
+					movingDevice = true;
+					startPos = new int[]{e.getX(), e.getY()};
+					deviceStart = new int[]{device.drawx,device.drawy};
+				}else{
+					drawingLink = true;
+				}
+			}
+		}
+		for(NetworkDevice device : simulation.hostDevices){
+			if(device.isDisabled())continue;
+			
+			int rx = device.drawx;
+			int ry = device.drawy;
+
+			int ex = e.getX();
+			int ey = e.getY();
+			
+			double distance = Math.sqrt(Math.pow(rx-ex, 2) + Math.pow(ry-ey, 2));
+			
+			if(distance < 25){
+				selectedObject = device;
+				mousePosition = new int[]{e.getX(), e.getY()};
+				if(spacePressed){
+					movingDevice = true;
+					startPos = new int[]{e.getX(), e.getY()};
+					deviceStart = new int[]{device.drawx,device.drawy};
+				}else{
+					drawingLink = true;
+				}
 			}
 		}
 		
@@ -631,13 +674,14 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		if(drawingLink && selectedObject instanceof Router){
-			Router sourceRouter = (Router)selectedObject;
-			Router destinationRouter = null;
-			for(NetworkDevice router : simulation.networkDevices){
+		if(drawingLink && selectedObject instanceof NetworkDevice){
+			NetworkDevice sourceDevice = (NetworkDevice)selectedObject;
+			NetworkDevice destinationDevice = null;
+			for(NetworkDevice device : simulation.networkDevices){
+				if(device.isDisabled())continue;
 				
-				int rx = routerPositions[router.drawID][0];
-				int ry = routerPositions[router.drawID][1];
+				int rx = device.drawx;
+				int ry = device.drawy;
 
 				int ex = e.getX();
 				int ey = e.getY();
@@ -645,33 +689,50 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 				double distance = Math.sqrt(Math.pow(rx-ex, 2) + Math.pow(ry-ey, 2));
 				
 				if(distance < 25){
-					destinationRouter = (Router)router;
+					destinationDevice = device;
+				}
+			}
+			for(NetworkDevice device : simulation.hostDevices){
+				if(device.isDisabled())continue;
+				
+				int rx = device.drawx;
+				int ry = device.drawy;
+
+				int ex = e.getX();
+				int ey = e.getY();
+				
+				double distance = Math.sqrt(Math.pow(rx-ex, 2) + Math.pow(ry-ey, 2));
+				
+				if(distance < 25){
+					destinationDevice = device;
 				}
 			}
 			
-			if(destinationRouter != null){
+			if(destinationDevice != null && (!(destinationDevice instanceof Host) || !(selectedObject instanceof Host)) && destinationDevice != selectedObject){
 				//If this link doesnt exist add it
 				boolean linkExists = false;
 				for(Link link : linkList){
-					if(link.getSource().drawID == sourceRouter.drawID && link.getTarget().drawID == destinationRouter.drawID){
+					if(link.getSource().getID() == sourceDevice.getID() && link.getTarget().getID() == destinationDevice.getID()){
 						linkExists = true;
 						link.setDisabled(false);
+						link.getPartnerLink().setDisabled(false);
+						System.out.println("Found existing link");
 						break;
 					}
 				}
 				
 				if(!linkExists){
 					//add new link
-					Link leftLink = new Link(sourceRouter, destinationRouter, 1);
-					Link rightLink = new Link(destinationRouter, sourceRouter, 1);
+					Link leftLink = new Link(sourceDevice, destinationDevice, 1);
+					Link rightLink = new Link(destinationDevice, sourceDevice, 1);
 
 					leftLink.setPartnerLink(rightLink);
 					rightLink.setPartnerLink(leftLink);
 
-					sourceRouter.addOutLink(leftLink);
-					sourceRouter.addInLink(rightLink);
-					destinationRouter.addOutLink(rightLink);
-					destinationRouter.addInLink(leftLink);
+					sourceDevice.addOutLink(leftLink);
+					sourceDevice.addInLink(rightLink);
+					destinationDevice.addOutLink(rightLink);
+					destinationDevice.addInLink(leftLink);
 					
 					linkList.add(leftLink);
 					linkList.add(rightLink);
@@ -690,6 +751,15 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 	public void mouseDragged(MouseEvent e) {
 		mousePosition = new int[]{e.getX(), e.getY()};
 		if(drawingLink){
+			graphicsPanel.repaint();
+		}
+		if(movingDevice && selectedObject instanceof NetworkDevice){
+			NetworkDevice device = (NetworkDevice)selectedObject;
+			int dx = mousePosition[0] - startPos[0];
+			int dy = mousePosition[1] - startPos[1];
+
+			device.drawx = dx + deviceStart[0];
+			device.drawy = dy + deviceStart[1];
 			graphicsPanel.repaint();
 		}
 	}
@@ -714,6 +784,23 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 					
 					return true;
 				}
+			}
+		}
+		if (e.getKeyCode() == KeyEvent.VK_M){
+			if(e.getID() == KeyEvent.KEY_PRESSED){
+				spacePressed = true;
+			}else{
+				if(movingDevice){
+					NetworkDevice device = (NetworkDevice)selectedObject;
+					int dx = mousePosition[0] - startPos[0];
+					int dy = mousePosition[1] - startPos[1];
+
+					device.drawx = dx + deviceStart[0];
+					device.drawy = dy + deviceStart[1];
+					graphicsPanel.repaint();
+				}
+				spacePressed = false;
+				movingDevice = false;
 			}
 		}
 		return false;

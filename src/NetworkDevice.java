@@ -13,6 +13,8 @@ public abstract class NetworkDevice {
 	List<Link> outLinks;
 	List<Link> inLinks;
 	
+	public int drawx,drawy;
+	
 	public NetworkDevice()
 	{
 		ID = tally++;
@@ -23,6 +25,21 @@ public abstract class NetworkDevice {
 	
 	public boolean isDisabled(){
 		return isDisabled;
+	}
+	
+	public void setDisabled(boolean disabled){
+		isDisabled = disabled;
+		
+		if(disabled){
+			for(int i = outLinks.size()-1; i>=0; i--){
+				outLinks.get(i).setDisabled(true);
+				outLinks.get(i).getPartnerLink().setDisabled(true);
+			}
+			for(int i = inLinks.size()-1; i>=0; i--){
+				inLinks.get(i).setDisabled(true);
+				inLinks.get(i).getPartnerLink().setDisabled(true);
+			}
+		}
 	}
 	
 	public int getID()

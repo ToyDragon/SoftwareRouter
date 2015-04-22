@@ -45,7 +45,6 @@ public class Simulation {
 	}
 	
 	public void tick(){
-		System.out.println("Ticked!");
 		runner.graphicsPanel.repaint();
 		if(runner.isPaused())return;
 		
@@ -66,15 +65,17 @@ public class Simulation {
 			hostDevices.remove(device);
 			networkDevices.remove(device);
 		}
-		for(int i = devicesToAdd.size()-1; i >= 0; i--){
-			NetworkDevice device = devicesToAdd.remove(i);
-			if(device instanceof Host){
-				hostDevices.add(device);
-			}else if(device instanceof Router){
-				networkDevices.add(device);
+		if(devicesToAdd.size() > 0){
+			for(int i = devicesToAdd.size()-1; i >= 0; i--){
+				NetworkDevice device = devicesToAdd.remove(i);
+				if(device instanceof Host){
+					hostDevices.add(device);
+				}else if(device instanceof Router){
+					networkDevices.add(device);
+				}
 			}
+			runner.updateHostComboboxes();
 		}
-		
 		for(int i = linksToRemove.size()-1; i >= 0; i--){
 			Link link = linksToRemove.remove(i);
 			for(NetworkDevice device : networkDevices){
