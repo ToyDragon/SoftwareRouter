@@ -22,10 +22,9 @@ public class Router extends NetworkDevice{
 	
 	public void sendDV()
 	{
-		//for each link
+		for(Link l : outLinks)
 		{
-			Link l = new Link(this,this,1);
-			RoutingPacket temp = new RoutingPacket(l.getTarget().getID(),table);
+			l.addPacket(new RoutingPacket(l.getTarget().getID(), new RoutingRow(getID(), table)));
 		}
 	}
 	
