@@ -1,8 +1,3 @@
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-
 
 public class Link {
 
@@ -11,7 +6,6 @@ public class Link {
 	private int linkCost;
 	private Clock clock;
 	public static double failRate;
-	private boolean isBusy;
 	private boolean isDisabled;
 	private Link partnerLink;
 	private MinHeap<Packet> transitPackets;
@@ -19,7 +13,6 @@ public class Link {
 	public Link(NetworkDevice source, NetworkDevice target, int cost, Clock c)
 	{
 		transitPackets = new MinHeap<Packet>();
-		isBusy = false;
 		clock = c;
 		this.linkCost = cost;
 		this.target = target;		
@@ -51,9 +44,7 @@ public class Link {
 	}
 	
 	public void addPacket(Packet packet){
-		if(!isBusy && !isDisabled){
-			isBusy = true;
-			
+		if(!isDisabled){			
 			//packet.timeInQueue = 0;
 			transitPackets.add(clock.time() + linkCost, packet);
 		}
@@ -82,20 +73,9 @@ public class Link {
 				System.out.println(e.getMessage());
 			}
 		}
-	}
-	
-	public Packet peekHead(){
-		return arrivedPackets.peek();
-	}
-	
-	public Packet popHead(){
-		return arrivedPackets.poll();
-	}
-	
-	public boolean isBusy(){
-		return isBusy;
-	}
-	
+	}	
+
+
 	public NetworkDevice getDevice(){
 		return target;
 	}
