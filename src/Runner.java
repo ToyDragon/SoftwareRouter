@@ -13,6 +13,8 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -152,19 +154,19 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		simulation.setHostDevices(hostList);
 		
 		int[][] rawLinks = {
-				{0,1,1},
-				{1,2,1},
-				{3,4,1},
-				{4,5,1},
-				{0,3,1},
-				{1,3,1},
-				{1,5,1},
-				{1,4,1},
-				{2,4,1},
-				{0,6,1},
-				{2,7,1},
-				{8,3,1},
-				{5,9,1}
+				{0,1,3},
+				{1,2,3},
+				{3,4,3},
+				{4,5,3},
+				{0,3,3},
+				{1,3,3},
+				{1,5,3},
+				{1,4,3},
+				{2,4,3},
+				{0,6,3},
+				{2,7,3},
+				{8,3,3},
+				{5,9,3}
 		};
 		
 		amtLinks = rawLinks.length;
@@ -195,6 +197,17 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		window.setLocationRelativeTo(null);
 		window.setResizable(false);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		window.addWindowListener(new WindowListener() {
+			@Override public void windowOpened(WindowEvent arg0) {}
+			@Override public void windowIconified(WindowEvent arg0) {}
+			@Override public void windowDeiconified(WindowEvent arg0) {}
+			@Override public void windowDeactivated(WindowEvent arg0) {}
+			@Override public void windowClosing(WindowEvent arg0) {}
+			@Override public void windowActivated(WindowEvent arg0) {}			
+			@Override public void windowClosed(WindowEvent arg0) {
+				//save shit to file
+			}
+		});
 		
 		mainPanel = new JPanel();
 		leftPanel = new JPanel();
@@ -352,6 +365,28 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
         });
         buttonSendPacket.setAlignmentX(Component.CENTER_ALIGNMENT);
         
+        JButton buttonPause = new JButton("Pause");
+        buttonPause.addActionListener(new ActionListener(){
+        	@Override
+        	public void actionPerformed(ActionEvent arg0){
+        		isPaused = !isPaused;
+        		if(isPaused){
+        			buttonPause.setText("Unpause");
+        		}else{
+        			buttonPause.setText("Pause");
+        		}
+        	}
+        });
+        buttonPause.setAlignmentX(Component.CENTER_ALIGNMENT);
+        buttonPause.setPreferredSize(new Dimension((int)(buttonPause.getPreferredSize().getWidth()+15),(int)(buttonPause.getPreferredSize().getHeight())));
+        buttonPause.setMaximumSize(buttonPause.getPreferredSize());
+        
+        JLabel labelSource = new JLabel("Source:");
+        labelSource.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel labelDestination = new JLabel("Destination:");
+        labelDestination.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        
         comboSource = new JComboBox<String>(new String[]{"Temp1","Temp2"});
         comboSource.setMaximumSize(comboSource.getPreferredSize());
         comboSource.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -360,6 +395,8 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
         comboDest.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         leftPanel.add(Box.createVerticalStrut(10));
+		leftPanel.add(buttonPause);
+		leftPanel.add(Box.createVerticalStrut(10));
 		leftPanel.add(btnAddRouter);
 		leftPanel.add(Box.createVerticalStrut(10));
 		leftPanel.add(btnAddHost);
@@ -372,8 +409,10 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		leftPanel.add(Box.createVerticalStrut(10));
 		leftPanel.add(button_removelink);
 		leftPanel.add(Box.createVerticalStrut(10));
+		leftPanel.add(labelSource);
 		leftPanel.add(comboSource);
 		leftPanel.add(Box.createVerticalStrut(10));
+		leftPanel.add(labelDestination);
 		leftPanel.add(comboDest);
 		leftPanel.add(Box.createVerticalStrut(10));
 		leftPanel.add(buttonSendPacket);
@@ -442,7 +481,6 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 			if(link.hasPackets() || link.getPartnerLink().hasPackets()){
 				g.setColor(Color.PINK);
 				g.fillRect(rx-13,ry-17,32,35);
-				System.out.println("Link has packets!");
 			}
 			
 			g.setColor(Color.GRAY);

@@ -11,6 +11,7 @@ public class Router extends NetworkDevice{
 	public Router(){
 		super();
 		drawID = drawtally++;
+		initializeTable(50);
 	}
 	
 	public void initializeTable(int n)
@@ -31,11 +32,12 @@ public class Router extends NetworkDevice{
 		if(this.getID() == p.getDest())
 		{
 			boolean found = false;
-			for(RoutingRow r : neighborVectors)
+			for(int i = neighborVectors.size()-1; i>=0; i--)
 			{
+				RoutingRow r = neighborVectors.get(i);
 				if(r.source == ((RoutingPacket)p).getPayload().source)
 				{
-					r = ((RoutingPacket)p).getPayload();
+					neighborVectors.set(i,((RoutingPacket)p).getPayload());
 					found = true;
 				}				
 			}
@@ -43,35 +45,63 @@ public class Router extends NetworkDevice{
 				neighborVectors.add(((RoutingPacket)p).getPayload());
 			updateTable();
 		}
-		else
+		else{
+			if(table[p.getDest()] == null || table[p.getDest()].dest == null){
+				System.out.println("table["+p.getDest()+"] is null for "+getID());
+				return;
+			}
+			System.out.println("From "+getID()+" to "+p.getDest()+": link " + table[p.getDest()].dest + " ("+table[p.getDest()].weight+")");
 			table[p.getDest()].dest.addPacket(p);
+		}
 		
 	}
 	
-	private void updateTable()
+	public void updateTable()
 	{
 		boolean updated = false;
 		Pair[] temp = new Pair[table.length];
 		
-		for(int i = 0; i < temp.length; i++)
-			temp[i] = new Pair();
+		for(int i = 0; i < temp.length; i++){
+			temp[i] = table[i];
+			if(temp[i] == null || (temp[i].dest != null && temp[i].dest.getDisabled()))
+				temp[i] = new Pair();
+		}
 		for(RoutingRow r : neighborVectors)
 		{
 			for(Link l : outLinks)
 			{
 				if(l.getTarget().getID() == r.source)
 				{
+					//if a link changed cost, update it in the table
+					for(int i = 0; i < temp.length; i++){
+						Pair otherPair = r.vector[i];
+						if(otherPair == null)otherPair = new Pair();
+						int newCost = otherPair.weight + l.getCost();
+						if(temp[i].dest == l && temp[i].weight != newCost && newCost >= 0 && newCost < Integer.MAX_VALUE){
+							temp[i].weight = newCost;
+						}
+					}
+					//find new shortest paths
 					for(int i = 0; i < temp.length; i++)
 					{
-						if(r.vector[i].weight + l.getCost() < temp[i].weight)
-						{
-							temp[i].weight = r.vector[i].weight + l.getCost();
-							temp[i].dest = l; 
+						Pair otherPair = r.vector[i];
+						if(otherPair != null){
+							int newCost = otherPair.weight + l.getCost();
+							if(r.vector[i] != null && i!=getID() && newCost < Integer.MAX_VALUE && newCost >= 0 && newCost < temp[i].weight)
+							{
+								temp[i].weight = newCost;
+								temp[i].dest = l;
+								updated = true;
+							}
 						}
 					}
 					break;
 				}
 			}
+		}
+		if(updated){
+			table = temp;
+			sendDV();
 		}
 	}
 	
@@ -83,47 +113,6 @@ public class Router extends NetworkDevice{
 		}
 	}
 	
-	/*public void tick() {
-		
-		for(Link sourceLink : inLinks){
-			Packet toSend = sourceLink.peekHead();
-			
-			if(toSend instanceof RoutingPacket){
-				updateRoutingTable((RoutingPacket)toSend);
-				
-			}else{
-				Link destLink = getDestinationLink(toSend);
-				
-				if(destLink == null){
-					//Drop packet if we can't forward it
-					sourceLink.popHead();
-				}else{
-					if(!destLink.isBusy()){
-						//if outbound link isn't busy forward the packet
-						destLink.addPacket(toSend);
-						sourceLink.popHead();
-					}else{
-						//if the outbound link is busy, just move on to the next input link
-						//do nothing
-					}
-				}
-			}
-		}
-	}*/
-	
-	public RoutingPacket getRoutingPacket(){
-		//TODO
-		//create and return a meaningful routing packet. maybe just a copy of the routing table?
-		return null;
-	}
-	
-
-	public Link getDestinationLink(Packet packet){
-		//TODO
-		//use routing table to determine where packet should go, return outbound link
-		return null;
-	}
-	
 	public void addInLink(Link link){
 		super.addInLink(link);
 		//routing table will update when routingpacket is received
@@ -133,6 +122,10 @@ public class Router extends NetworkDevice{
 	public void addOutLink(Link link){
 		super.addOutLink(link);
 		hasTableChanged = true;
+		table[link.getTarget().getID()] = new Pair();
+		table[link.getTarget().getID()].dest = link;
+		table[link.getTarget().getID()].weight = link.getCost();
+		sendDV();
 		//TODO
 		//Update routing table and set hasTableChanged to true if it has changed
 	}

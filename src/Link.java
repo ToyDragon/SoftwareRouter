@@ -33,6 +33,11 @@ public class Link {
 	
 	public void setDisabled(boolean disabled){
 		isDisabled = disabled;
+		if(isDisabled){
+			setCost(Integer.MAX_VALUE);
+		}else{
+			setCost(1);
+		}
 	}
 	
 	public void setPartnerLink(Link partnerLink){
@@ -66,13 +71,18 @@ public class Link {
 				{
 					target.process(transitPackets.extract());
 					b = true;
+
+					if(Math.random() < failRate){
+						setDisabled(true);
+					}
 				}
 			}
 			catch(Exception e)
 			{
-				System.out.println(e.getMessage());
+				e.printStackTrace();
 			}
 		}
+		
 	}	
 
 
@@ -85,6 +95,8 @@ public class Link {
 		if(k <= 0)
 			throw new IllegalArgumentException();
 		linkCost = k;
+		if(source instanceof Router)((Router)source).updateTable();
+		if(target instanceof Router)((Router)target).updateTable();
 		source.sendDV();
 		target.sendDV();
 	}

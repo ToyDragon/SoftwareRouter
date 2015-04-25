@@ -35,8 +35,15 @@ public class MinHeap<T>
 	private void grow()
 	{
 		Wrapper<T>[] temp = new Wrapper[heap.length * 2];
-		for(int i = 0; i <= size; i++)
-			temp[i] = heap[i];
+		for(int i = 0; i <= size; i++){
+			if(temp.length <= i){
+				System.out.println("Temp too small!");
+			}else if(heap.length <= i){
+				System.out.println("Heap too small!");
+			}else{
+				temp[i] = heap[i];
+			}
+		}
 		heap = temp;
 	}
 	
@@ -61,7 +68,7 @@ public class MinHeap<T>
 	
 	public void add(int x, T t)
 	{
-		if(size >= heap.length)
+		if(size >= heap.length - 1)
 			grow();
 		heap[size] = new Wrapper<T>(x,t);
 		rollUp(size);
