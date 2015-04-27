@@ -365,7 +365,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
         });
         buttonSendPacket.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        JButton buttonPause = new JButton("Pause");
+        final JButton buttonPause = new JButton("Pause");
         buttonPause.addActionListener(new ActionListener(){
         	@Override
         	public void actionPerformed(ActionEvent arg0){
