@@ -3,9 +3,9 @@ public class RoutingPacket extends Packet
 {	
 	private final RoutingRow payload;
 	
-	public RoutingPacket(int k, RoutingRow o)
+	public RoutingPacket(int des, int src, RoutingRow o)
 	{
-		super(k);
+		super(des, src);
 		payload = o;
 	}
 	

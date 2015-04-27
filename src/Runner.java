@@ -357,7 +357,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 				int sourceID = Integer.parseInt(""+comboSource.getSelectedItem());
 				int destID = Integer.parseInt(""+comboDest.getSelectedItem());
 				
-				Packet newPacket = new Packet(destID);
+				Packet newPacket = new Packet(destID, sourceID);
 				((Host)NetworkDevice.getDevice(sourceID)).sendPacket(newPacket);
 				
 				graphicsPanel.repaint();

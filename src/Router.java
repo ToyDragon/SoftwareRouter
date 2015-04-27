@@ -111,7 +111,7 @@ public class Router extends NetworkDevice{
 	{
 		for(Link l : outLinks)
 		{
-			l.addPacket(new RoutingPacket(l.getTarget().getID(), new RoutingRow(getID(), table)));
+			l.addPacket(new RoutingPacket(l.getTarget().getID(), this.getID(),new RoutingRow(getID(), table)));
 		}
 	}
 	
