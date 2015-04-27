@@ -96,6 +96,7 @@ public class PathCache {
 				out.println("The most popular routes from device" + e.getSrc() + " to device" + k + " are: ");
 				out.println(e);
 			}
+			out.close();
 		}
 		catch(FileNotFoundException e)
 		{

@@ -48,10 +48,12 @@ public class Simulation {
 		runner.graphicsPanel.repaint();
 		if(runner.isPaused())return;
 		runner.clock.tick();
+		
 		//tick all devices and links
 		for(NetworkDevice device : hostDevices){
 			device.tick();
 		}
+		
 		/*for(NetworkDevice device : networkDevices){
 			device.tick();
 		}*/
@@ -66,6 +68,7 @@ public class Simulation {
 			hostDevices.remove(device);
 			networkDevices.remove(device);
 		}
+		
 		if(devicesToAdd.size() > 0){
 			for(int i = devicesToAdd.size()-1; i >= 0; i--){
 				NetworkDevice device = devicesToAdd.remove(i);

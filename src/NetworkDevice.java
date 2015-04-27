@@ -68,6 +68,9 @@ public abstract class NetworkDevice {
 	public void tick()
 	{}
 	
+	public void terminate()
+	{}
+	
 	public static NetworkDevice getDevice(int ID){
 		return idMap.get(ID);
 	}
