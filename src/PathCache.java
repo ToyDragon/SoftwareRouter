@@ -53,10 +53,10 @@ public class PathCache {
 			if(arr[0].length() > 0)
 			{
 				temp = temp + arr[0];
-				if(arr[1].length() > 0)
+				if(arr[1] != null && arr[1].length() > 0)
 				{
 					temp = temp + "\n" + arr[1];
-					if(arr[2].length() > 0)
+					if(arr[2] != null && arr[2].length() > 0)
 						temp = temp + "\n" + arr[2];
 				}
 			}
@@ -90,7 +90,9 @@ public class PathCache {
 	{
 		try
 		{
-			PrintWriter out = new PrintWriter(new File("Device" + k + "Cache"));
+			File dir = new File("data");
+			if(!dir.exists())dir.mkdir();
+			PrintWriter out = new PrintWriter(new File("data/Host" + k + ".dat"));
 			for(Entry e : cacheEntries)
 			{
 				out.println("The most popular routes from device" + e.getSrc() + " to device" + k + " are: ");
@@ -100,7 +102,7 @@ public class PathCache {
 		}
 		catch(FileNotFoundException e)
 		{
-			System.out.println("Making new file.");
+			e.printStackTrace();
 		}
 		
 	}

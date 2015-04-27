@@ -1,4 +1,5 @@
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -148,16 +149,22 @@ public class Router extends NetworkDevice{
 	{
 		try
 		{
-			PrintWriter out = new PrintWriter("Router"+getID());
+			File dir = new File("data");
+			if(!dir.exists())dir.mkdir();
+			File file = new File("data/Router"+getID()+".dat");
+			PrintWriter out = new PrintWriter(file);
 			out.println("Source|Destination|Cost|Next" );
 			for(int i = 0; i < table.length; i++)
 			{
+				if(table[i] == null || table[i].dest == null)continue;
 				out.println(getID() + " | " + i + " | " + table[i].weight + " | " + table[i].dest.getTarget().getID() );
 			}
 			out.close();
+			System.out.println("Printed");
 		}
-		catch(FileNotFoundException e)
+		catch(Exception e)
 		{
+			e.printStackTrace();
 		}
 	}
 	

@@ -74,4 +74,10 @@ public abstract class NetworkDevice {
 	public static NetworkDevice getDevice(int ID){
 		return idMap.get(ID);
 	}
+	
+	public static void saveAll(){
+		for(Integer key : idMap.keySet()){
+			idMap.get(key).terminate();
+		}
+	}
 }
