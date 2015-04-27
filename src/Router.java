@@ -1,4 +1,6 @@
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class Router extends NetworkDevice{
@@ -139,6 +141,23 @@ public class Router extends NetworkDevice{
 		//Update routing table and set hasTableChanged to true if it has changed
 		
 		return value;
+	}
+	
+	public void terminate()
+	{
+		try
+		{
+			PrintWriter out = new PrintWriter("Router"+getID());
+			out.println("Source|Destination|Cost|Next" );
+			for(int i = 0; i < table.length; i++)
+			{
+				out.println(getID() + " | " + i + " | " + table[i].weight + " | " + table[i].dest.getTarget().getID() );
+			}
+			out.close();
+		}
+		catch(FileNotFoundException e)
+		{
+		}
 	}
 	
 }
