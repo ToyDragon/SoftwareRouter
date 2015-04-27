@@ -11,16 +11,27 @@ public class Host extends NetworkDevice{
 		drawID = drawtally++;
 	}
 	
-	public void sendPacket(Packet packet){
+	/*public void sendPacket(Packet packet){
 		//packetsToSend.add(packet);
 		for(Link link : outLinks)
 		{
 			link.addPacket(packet);
 			break; //Yeah, this is a silly block, I know.
 		}
+	}*/
+	public void process(Packet p)
+	{
+		if(getID() == p.getDest())
+		{
+			System.out.println(p.retrievePath());
+		}
+		else
+		{
+			packetsToSend.add(p);
+		}
 	}
 	
-	/*public void tick(){
+	public void tick(){
 		while(packetsToSend.size() > 0){
 			for(Link link : outLinks){
 				if(!link.getDisabled()){
@@ -29,5 +40,5 @@ public class Host extends NetworkDevice{
 				}
 			}
 		}
-	}*/
+	}
 }

@@ -31,6 +31,7 @@ public class Router extends NetworkDevice{
 	
 	public void process(Packet p)
 	{
+		p.mark(getID());
 		if(this.getID() == p.getDest())
 		{
 			boolean found = false;

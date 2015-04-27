@@ -47,16 +47,15 @@ public class Simulation {
 	public void tick(){
 		runner.graphicsPanel.repaint();
 		if(runner.isPaused())return;
-		
+		runner.clock.tick();
 		//tick all devices and links
-		/*for(NetworkDevice device : hostDevices){
+		for(NetworkDevice device : hostDevices){
 			device.tick();
-		}*/
+		}
 		/*for(NetworkDevice device : networkDevices){
 			device.tick();
 		}*/
 		
-		runner.clock.tick();
 		for(Link link : linkList){
 			link.tick();
 		}
