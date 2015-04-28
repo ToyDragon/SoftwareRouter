@@ -33,7 +33,7 @@ public class PathCache {
 			{
 				//Nothing happens...
 			}
-			else if(arr[1].compareTo(s) == 0)
+			else if(arr[1] == null || arr[1].compareTo(s) == 0)
 			{	
 				arr[1] = arr[0];
 				arr[0] = s;
