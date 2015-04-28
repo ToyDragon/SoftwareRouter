@@ -33,8 +33,15 @@ public class Link {
 	
 	public void setDisabled(boolean disabled){
 		isDisabled = disabled;
+		if(getPartnerLink().getDisabled() != disabled){
+			getPartnerLink().setDisabled(disabled);
+		}
 		if(isDisabled){
-			setCost(Integer.MAX_VALUE);
+			//setCost(Integer.MAX_VALUE);
+			if(getTarget() instanceof Router){
+				((Router)getTarget()).updateTable();
+				System.out.println("Update from removed link");
+			}
 		}else{
 			setCost(1);
 		}
@@ -95,10 +102,11 @@ public class Link {
 		if(k <= 0)
 			throw new IllegalArgumentException();
 		linkCost = k;
+		if(getPartnerLink().getCost() != k){
+			getPartnerLink().setCost(k);
+		}
 		if(source instanceof Router)((Router)source).updateTable();
 		if(target instanceof Router)((Router)target).updateTable();
-		source.sendDV();
-		target.sendDV();
 	}
 	
 	public int getCost()

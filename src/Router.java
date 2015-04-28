@@ -54,7 +54,7 @@ public class Router extends NetworkDevice{
 				System.out.println("table["+p.getDest()+"] is null for "+getID());
 				return;
 			}
-			System.out.println("From "+getID()+" to "+p.getDest()+": link " + table[p.getDest()].dest + " ("+table[p.getDest()].weight+")");
+			System.out.println("From "+getID()+" to "+p.getDest()+": link " + table[p.getDest()].dest + " ("+table[p.getDest()].weight+")"+table[p.getDest()].dest.getDisabled());
 			table[p.getDest()].dest.addPacket(p);
 		}
 		
@@ -67,14 +67,29 @@ public class Router extends NetworkDevice{
 		
 		for(int i = 0; i < temp.length; i++){
 			temp[i] = table[i];
-			if(temp[i] == null || (temp[i].dest != null && temp[i].dest.getDisabled()))
+			if(temp[i] == null || (temp[i].dest != null && temp[i].dest.getDisabled())){
+				try{
+					if(temp[i].dest.getDisabled()){
+						System.out.println("Removed disabled from " + getID() + " to " + temp[i].dest.getTarget().getID());
+					}
+				}catch(Exception e){}
 				temp[i] = new Pair();
+				updated = true;
+			}
+		}
+		//check my own out links to be sure
+		for(Link l : outLinks){
+			Pair pair = temp[l.getTarget().getID()];
+			if(pair.weight != l.getCost() && pair.dest == l){
+				pair.weight = l.getCost();
+				updated = true;
+			}
 		}
 		for(RoutingRow r : neighborVectors)
 		{
 			for(Link l : outLinks)
 			{
-				if(l.getTarget().getID() == r.source)
+				if(l.getTarget().getID() == r.source && !l.getDisabled())
 				{
 					//if a link changed cost, update it in the table
 					for(int i = 0; i < temp.length; i++){
@@ -83,6 +98,7 @@ public class Router extends NetworkDevice{
 						int newCost = otherPair.weight + l.getCost();
 						if(temp[i].dest == l && temp[i].weight != newCost && newCost >= 0 && newCost < Integer.MAX_VALUE){
 							temp[i].weight = newCost;
+							updated = true;
 						}
 					}
 					//find new shortest paths
@@ -145,6 +161,24 @@ public class Router extends NetworkDevice{
 		return value;
 	}
 	
+	public String getDVString(){
+		String str = "Src |Dest|Cost|Next\n";
+		for(int i = 0; i < table.length; i++)
+		{
+			if(table[i] == null || table[i].dest == null)continue;
+			String src = ""+getID();
+			while(src.length() < 4)src = " "+src;
+			String d = ""+i;
+			while(d.length() < 4)d = " "+d;
+			String w = ""+table[i].weight;
+			while(w.length() < 4)w = " "+w;
+			String f = ""+table[i].dest.getTarget().getID();
+			while(f.length() < 4)f = " "+f;
+			str += src + "|" + d + "|" + w + "|" + f + "\n";
+		}
+		return str;
+	}
+	
 	public void terminate()
 	{
 		try
@@ -153,12 +187,7 @@ public class Router extends NetworkDevice{
 			if(!dir.exists())dir.mkdir();
 			File file = new File("data/Router"+getID()+".dat");
 			PrintWriter out = new PrintWriter(file);
-			out.println("Source|Destination|Cost|Next" );
-			for(int i = 0; i < table.length; i++)
-			{
-				if(table[i] == null || table[i].dest == null)continue;
-				out.println(getID() + " | " + i + " | " + table[i].weight + " | " + table[i].dest.getTarget().getID() );
-			}
+			out.print(getDVString());
 			out.close();
 			System.out.println("Printed");
 		}

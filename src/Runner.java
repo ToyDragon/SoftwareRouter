@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
+import java.awt.Font;
+
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -77,6 +79,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 	BufferedImage curBuffer,buffer1,buffer2;
 	BufferedImage imgRouter, imgRouterSelected;
 	BufferedImage imgHost, imgHostSelected, imgHostInactive;
+	JTextArea textDVTable;
 	
 	public static void main(String[] args){
 		new Runner();
@@ -388,6 +391,11 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
         JLabel labelDestination = new JLabel("Destination:");
         labelDestination.setAlignmentX(Component.CENTER_ALIGNMENT);
         
+        textDVTable = new JTextArea(11,13);
+        //textDVTable.setPreferredSize(new Dimension(75,75));
+        textDVTable.setMaximumSize(textDVTable.getPreferredSize());
+        textDVTable.setFont(new Font("monospaced", Font.PLAIN, 12));
+        
         
         comboSource = new JComboBox<String>(new String[]{"Temp1","Temp2"});
         comboSource.setMaximumSize(comboSource.getPreferredSize());
@@ -418,6 +426,8 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		leftPanel.add(comboDest);
 		leftPanel.add(Box.createVerticalStrut(10));
 		leftPanel.add(buttonSendPacket);
+		leftPanel.add(Box.createVerticalStrut(10));
+		leftPanel.add(textDVTable);
 		
 		rightPanel.add(graphicsPanel);
 
@@ -733,6 +743,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 				
 				if(distance < 25){
 					destinationDevice = device;
+					textDVTable.setText(((Router)device).getDVString());
 				}
 			}
 			for(NetworkDevice device : simulation.hostDevices){
