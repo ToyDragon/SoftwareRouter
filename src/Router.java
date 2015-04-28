@@ -65,6 +65,17 @@ public class Router extends NetworkDevice{
 		boolean updated = false;
 		Pair[] temp = new Pair[table.length];
 		
+		for(int i = neighborVectors.size()-1; i >= 0; i--){
+			boolean hasLink = false;
+			for(Link l : outLinks){
+				hasLink |= l.getTarget().getID() == neighborVectors.get(i).source;
+			}
+			if(!hasLink){
+				System.out.println("Removed vector for " + neighborVectors.get(i).source);
+				neighborVectors.remove(i);
+			}
+		}
+		
 		for(int i = 0; i < temp.length; i++){
 			temp[i] = table[i];
 			if(temp[i] == null || (temp[i].dest != null && temp[i].dest.getDisabled())){
@@ -77,12 +88,18 @@ public class Router extends NetworkDevice{
 				updated = true;
 			}
 		}
+		
 		//check my own out links to be sure
 		for(Link l : outLinks){
 			Pair pair = temp[l.getTarget().getID()];
-			if(pair.weight != l.getCost() && pair.dest == l){
+			if(pair.weight > l.getCost() && !l.getDisabled()){
 				pair.weight = l.getCost();
+				pair.dest = l;
 				updated = true;
+			}else{
+				if(getID() == 5 && l.getTarget().getID() == 9){
+					System.out.println("Rejected " + l.getCost()+":"+l.getDisabled()+":"+pair.weight);
+				}
 			}
 		}
 		for(RoutingRow r : neighborVectors)
@@ -122,6 +139,7 @@ public class Router extends NetworkDevice{
 		if(updated){
 			table = temp;
 			sendDV();
+			Runner.instance.updateTableArea();
 		}
 	}
 	
@@ -145,6 +163,7 @@ public class Router extends NetworkDevice{
 		table[link.getTarget().getID()] = new Pair();
 		table[link.getTarget().getID()].dest = link;
 		table[link.getTarget().getID()].weight = link.getCost();
+		updateTable();
 		sendDV();
 		//TODO
 		//Update routing table and set hasTableChanged to true if it has changed
@@ -177,6 +196,15 @@ public class Router extends NetworkDevice{
 			str += src + "|" + d + "|" + w + "|" + f + "\n";
 		}
 		return str;
+	}
+	
+	public void removeVector(int target){
+		for(int i = neighborVectors.size()-1; i >= 0; i--){
+			if(neighborVectors.get(i).source == target){
+				neighborVectors.remove(i);
+			}
+		}
+		System.out.println("Clearing vector from " + getID() + " to " + target);
 	}
 	
 	public void terminate()

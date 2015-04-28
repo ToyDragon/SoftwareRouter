@@ -40,10 +40,21 @@ public class Link {
 			//setCost(Integer.MAX_VALUE);
 			if(getTarget() instanceof Router){
 				((Router)getTarget()).updateTable();
-				System.out.println("Update from removed link");
 			}
+			if(getSource() instanceof Router){
+				((Router)getSource()).updateTable();
+			}
+			System.out.println("Update from removed link");
 		}else{
 			setCost(1);
+		}
+		
+
+		if(getSource() instanceof Router){
+			((Router)getSource()).removeVector(getTarget().getID());
+		}
+		if(getTarget() instanceof Router){
+			((Router)getTarget()).removeVector(getSource().getID());
 		}
 	}
 	

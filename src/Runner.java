@@ -43,6 +43,7 @@ import javax.swing.ScrollPaneConstants;
 
 
 public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotionListener{
+	public static Runner instance;
 	
 	HashMap<Object, Shape> clickBoxMap = new HashMap<Object, Shape>();
 	
@@ -86,6 +87,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 	}
 	
 	public Runner(){
+		instance = this;
 		isRunning = true;
 		isPaused = false;
 		
@@ -606,6 +608,16 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 		
 		return dot;
 	}
+	
+	public void updateTableArea(){
+		if(textDVTable == null)return;
+		if(selectedObject instanceof Router){
+
+			textDVTable.setText(((Router)selectedObject).getDVString());
+		}else{
+			textDVTable.setText("");
+		}
+	}
 
 	//Compute the cross product AB x AC
 	private double CrossProduct(double[] pointA, double[] pointB, double[] pointC){
@@ -743,7 +755,6 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 				
 				if(distance < 25){
 					destinationDevice = device;
-					textDVTable.setText(((Router)device).getDVString());
 				}
 			}
 			for(NetworkDevice device : simulation.hostDevices){
@@ -796,7 +807,7 @@ public class Runner implements KeyEventPostProcessor, MouseListener, MouseMotion
 				}
 			}
 		}
-		
+		updateTableArea();
 		drawingLink = false;
 		graphicsPanel.repaint();
 	}
